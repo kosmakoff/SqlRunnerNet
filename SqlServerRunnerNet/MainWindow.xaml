@@ -6,12 +6,10 @@
 	xmlns:local="clr-namespace:SqlServerRunnerNet"
 	xmlns:commands="clr-namespace:SqlServerRunnerNet.Commands"
 	xmlns:viewModel="clr-namespace:SqlServerRunnerNet.ViewModel"
-	xmlns:common="clr-namespace:SqlServerRunnerNet.Controls.Common"
-	xmlns:commands1="clr-namespace:SqlServerRunnerNet.Infrastructure.Commands"
 	mc:Ignorable="d"
 	x:Class="SqlServerRunnerNet.MainWindow"
 	Title="SQL Runner .NET" Height="480" Width="640" Icon="run.ico"
-	ResizeMode="CanResizeWithGrip" d:DataContext="{d:DesignData /SampleData/FolderViewModelSampleData.xaml}">
+	ResizeMode="CanResizeWithGrip">
 	<Window.Resources>
 		<ResourceDictionary>
 			<ResourceDictionary.MergedDictionaries>
