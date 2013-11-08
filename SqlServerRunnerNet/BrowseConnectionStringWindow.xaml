@@ -1,0 +1,81 @@
+﻿<Window
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:infrastructure="clr-namespace:SqlServerRunnerNet.Infrastructure"
+        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+        xmlns:local="clr-namespace:SqlServerRunnerNet"
+        x:Class="SqlServerRunnerNet.BrowseConnectionStringWindow"
+        Title="Connection String" Height="237" Width="360"
+		ShowInTaskbar="False" SizeToContent="Height" ResizeMode="NoResize">
+	<Grid Margin="10">
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition Width="Auto" />
+			<ColumnDefinition Width="20px"/>
+			<ColumnDefinition Width="*" />
+		</Grid.ColumnDefinitions>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto"/>
+			<RowDefinition Height="5"/>
+			<RowDefinition Height="Auto"/>
+			<RowDefinition Height="5"/>
+			<RowDefinition Height="Auto"/>
+			<RowDefinition Height="5"/>
+			<RowDefinition Height="Auto"/>
+			<RowDefinition Height="5"/>
+			<RowDefinition Height="Auto"/>
+			<RowDefinition Height="*"/>
+		</Grid.RowDefinitions>
+		<Label Grid.Row="0" Grid.Column="0" Content="Server name:" x:Name="LblServerName" />
+		<Label Grid.Row="2" Grid.Column="0" Content="Authentication:"/>
+		<Label Grid.Row="4" Grid.Column="0" Content="User name:" Margin="10,0,0,0"
+			   IsEnabled="{Binding Model.IsSqlServerUser, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:BrowseConnectionStringWindow}}}"/>
+		<Label Grid.Row="6" Grid.Column="0" Content="Password:" Margin="10,0,0,0"
+			   IsEnabled="{Binding Model.IsSqlServerUser, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:BrowseConnectionStringWindow}}}"/>
+		<Label Grid.Row="8" Grid.Column="0" Content="Database" />
+		<Grid Grid.Row="0" Grid.Column="2">
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="*" />
+				<ColumnDefinition Width="Auto" />
+			</Grid.ColumnDefinitions>
+			<TextBox Grid.Column="0" Text="{Binding Model.ServerName, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:BrowseConnectionStringWindow}}}" />
+			<Button Grid.Column="1" Margin="5,0,0,0" Padding="10,0" Click="BrowseServersButton_OnClick">...</Button>
+		</Grid>
+		<ComboBox Grid.Row="2" Grid.Column="2" ItemsSource="{infrastructure:EnumValues {x:Type infrastructure:AuthenticationType}}"
+				  SelectedItem="{Binding Model.AuthenticationType, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:BrowseConnectionStringWindow}}}">
+			<ComboBox.Resources>
+				<infrastructure:EnumValueToDescriptionConverter x:Key="DescriptionConverter" />
+			</ComboBox.Resources>
+			<ComboBox.ItemTemplate>
+				<DataTemplate>
+					<TextBlock Text="{Binding Converter={StaticResource DescriptionConverter}, Mode=OneTime}" />
+				</DataTemplate>
+			</ComboBox.ItemTemplate>
+		</ComboBox>
+		<TextBox Grid.Row="4" Grid.Column="2" VerticalContentAlignment="Center"
+				 IsEnabled="{Binding Model.IsSqlServerUser, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:BrowseConnectionStringWindow}}}">
+			<TextBox.Style>
+				<Style TargetType="{x:Type TextBox}">
+					<Style.Setters>
+						<Setter Property="Text" Value="{Binding Model.LocalUsername, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:BrowseConnectionStringWindow}}, Mode=OneTime}" />
+					</Style.Setters>
+					<Style.Triggers>
+						<DataTrigger Binding="{Binding Model.IsSqlServerUser, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:BrowseConnectionStringWindow}}}" Value="True">
+							<Setter Property="Text" Value="{Binding Model.SqlServerUsername, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:BrowseConnectionStringWindow}}}" />
+						</DataTrigger>
+					</Style.Triggers>
+				</Style>
+			</TextBox.Style>
+		</TextBox>
+		<PasswordBox Grid.Row="6" Grid.Column="2" VerticalContentAlignment="Center" x:Name="PasswordBox"
+					 IsEnabled="{Binding Model.IsSqlServerUser, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:BrowseConnectionStringWindow}}}">
+			<i:Interaction.Behaviors>
+				<infrastructure:PasswordBehavior Password="{Binding Model.Password, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:BrowseConnectionStringWindow}}, Mode=TwoWay}" />
+			</i:Interaction.Behaviors>
+		</PasswordBox>
+		<TextBox Grid.Row="8" Grid.Column="2" Text="{Binding Model.DatabaseName, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:BrowseConnectionStringWindow}}}" />
+		<StackPanel Grid.Row="9" Grid.Column="0" Grid.ColumnSpan="3" Orientation="Horizontal" Margin="0,5,0,0" HorizontalAlignment="Center" VerticalAlignment="Bottom">
+			<Button IsDefault="True" Padding="15,3" Content="OK" Click="OkButton_OnClick"/>
+			<Button IsCancel="True" Padding="15,3" Content="Cancel"/>
+		</StackPanel>
+	</Grid>
+</Window>

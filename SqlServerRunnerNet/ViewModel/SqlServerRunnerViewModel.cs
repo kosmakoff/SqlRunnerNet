@@ -1,0 +1,267 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Data.SqlClient;
+using System.IO;
+using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Input;
+using SqlServerRunnerNet.Annotations;
+using SqlServerRunnerNet.Business;
+using SqlServerRunnerNet.Infrastructure;
+using SqlServerRunnerNet.Infrastructure.Commands;
+
+namespace SqlServerRunnerNet.ViewModel
+{
+	public class SqlServerRunnerViewModel : INotifyPropertyChanged
+	{
+		private TrulyObservableCollection<ScriptsFolderViewModel> _scripts;
+		private string _connectionString;
+		private bool? _allScriptsChecked;
+		private ObservableCollection<FolderViewModel> _executedScripts;
+		private readonly Window _parent;
+		public event PropertyChangedEventHandler PropertyChanged;
+
+		[NotifyPropertyChangedInvocator]
+		protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+		{
+			PropertyChangedEventHandler handler = PropertyChanged;
+			if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
+		}
+
+		private SqlServerRunnerViewModel()
+		{
+			Scripts = new TrulyObservableCollection<ScriptsFolderViewModel>();
+			Scripts.ItemChanged += (sender, args) => OnPropertyChanged("AllScriptsChecked");
+			Scripts.CollectionChanged += (sender, args) => OnPropertyChanged("AllScriptsChecked");
+
+			ExecutedScripts = new ObservableCollection<FolderViewModel>();
+
+			AddScriptCommand = new DelegateCommand(AddScriptCommandExecute);
+			RemoveScriptCommand = new DelegateCommand(RemoveScriptCommandExecute, RemoveScriptCommandCanExecute);
+			ClearScriptsCommand = new DelegateCommand(ClearScriptsCommandExecute, ClearScriptsCommandCanExecute);
+			RunSelectedScriptsCommand = new AwaitableDelegateCommand(RunSelectedScriptsCommandExecute, RunSelectedScriptsCommandCanExecute);
+		}
+
+		public SqlServerRunnerViewModel(Window parent)
+			:this()
+		{
+			_parent = parent;
+		}
+
+		public string ConnectionString
+		{
+			get { return _connectionString; }
+			set
+			{
+				if (value == _connectionString) return;
+				_connectionString = value;
+				OnPropertyChanged();
+			}
+		}
+
+		public bool? AllScriptsChecked
+		{
+			get
+			{
+				var groups = Scripts.GroupBy(script => script.IsChecked).ToList();
+
+				if (groups.Count == 0)
+					_allScriptsChecked = false;
+				else if (groups.Count > 1)
+					_allScriptsChecked = null;
+				else
+				_allScriptsChecked = groups[0].Key;
+
+				return _allScriptsChecked;
+			}
+			set
+			{
+				if (value.Equals(_allScriptsChecked)) return;
+
+				_allScriptsChecked = value;
+
+				if (value.HasValue)
+				{
+					Scripts.InvokeWithoutNotify(script=>script.IsChecked = value.Value);
+				}
+
+				OnPropertyChanged();
+			}
+		}
+
+		public TrulyObservableCollection<ScriptsFolderViewModel> Scripts
+		{
+			get { return _scripts; }
+			private set
+			{
+				if (Equals(value, _scripts)) return;
+				_scripts = value;
+				OnPropertyChanged();
+				OnPropertyChanged("AllScriptsChecked");
+			}
+		}
+
+		public ObservableCollection<FolderViewModel> ExecutedScripts
+		{
+			get { return _executedScripts; }
+			set
+			{
+				if (Equals(value, _executedScripts)) return;
+				_executedScripts = value;
+				OnPropertyChanged();
+			}
+		}
+
+		#region Commands
+
+		public ICommand AddScriptCommand { get; private set; }
+		
+		public ICommand RemoveScriptCommand { get; private set; }
+
+		public ICommand ClearScriptsCommand { get; private set; }
+
+		public ICommand RunSelectedScriptsCommand { get; private set; }
+
+		#endregion
+
+		#region Commands Implementations
+
+		private void AddScriptCommandExecute()
+		{
+			var existingScriptsInfos = Scripts.Select(script => new DirectoryInfo(script.FilePath)).ToList();
+
+			var browseWindow = new BrowseScriptsWindow(_parent);
+			if (browseWindow.ShowDialog() == true)
+			{
+				var newDirectories = browseWindow
+					.SelectedDirectories
+					.Where(info => !existingScriptsInfos.Contains(info, new DirectoryInfoComparer()));
+
+				foreach (var directoryInfo in newDirectories)
+				{
+					Scripts.Add(new ScriptsFolderViewModel { FilePath = directoryInfo.FullName.TrimEnd('\\'), IsChecked = true });
+				}
+			}
+
+			var items = Scripts.ToArray().OrderBy(script => script.FilePath);
+
+			Scripts.Clear();
+			items.ToList().ForEach(Scripts.Add);
+		}
+
+		private void RemoveScriptCommandExecute()
+		{
+			Scripts.Where(script => script.IsSelected).ToList().ForEach(script => Scripts.Remove(script));
+		}
+
+		private bool RemoveScriptCommandCanExecute()
+		{
+			return Scripts.Any(script => script.IsSelected);
+		}
+
+		private void ClearScriptsCommandExecute()
+		{
+			Scripts.Clear();
+		}
+
+		private bool ClearScriptsCommandCanExecute()
+		{
+			return Scripts.Any();
+		}
+
+		private Task RunSelectedScriptsCommandExecute()
+		{
+			try
+			{
+				if (string.IsNullOrWhiteSpace(ConnectionString))
+					throw new Exception();
+
+				new SqlConnectionStringBuilder { ConnectionString = ConnectionString };
+			}
+			catch
+			{
+				MessageBox.Show(_parent, "Invalid connection string", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+				return Task.Run(() => { });
+			}
+
+			// and here we try to establish the connection
+
+			try
+			{
+				using (var connection = new SqlConnection(ConnectionString))
+				{
+					connection.Open();
+				}
+			}
+			catch
+			{
+				MessageBox.Show(_parent, "Cannot establish the connection to the server", "Error", MessageBoxButton.OK,
+					MessageBoxImage.Error);
+				return Task.Run(() => { });
+			}
+
+			return Task.Run(() =>
+			{
+
+				// main part of the APP
+
+				foreach (var scriptFolder in Scripts)
+				{
+					var path = scriptFolder.FilePath;
+					var di = new DirectoryInfo(path);
+					if (!di.Exists)
+						continue;
+
+					var sqlFiles = di.EnumerateFiles("*.sql").ToList();
+
+					if (!sqlFiles.Any())
+						continue;
+
+					var executedFolderViewModel = new FolderViewModel {Path = path};
+
+					_parent.Dispatcher.Invoke(() => ExecutedScripts.Add(executedFolderViewModel));
+					
+					foreach (var fileInfo in sqlFiles)
+					{
+						var scriptPath = fileInfo.FullName;
+
+						var executedScriptModel = new ScriptViewModel {Path = scriptPath};
+
+						string errorMessage;
+
+						if (!SqlScriptRunner.RunSqlScriptOnConnection(ConnectionString, scriptPath, out errorMessage))
+						{
+							executedScriptModel.ErrorMessage = errorMessage;
+						}
+
+						_parent.Dispatcher.Invoke(() => executedFolderViewModel.Scripts.Add(executedScriptModel));
+					}
+				}
+			});
+		}
+
+		private bool RunSelectedScriptsCommandCanExecute()
+		{
+			return Scripts.Any(script => script.IsChecked);
+		}
+
+		#endregion
+
+		class DirectoryInfoComparer : IEqualityComparer<DirectoryInfo>
+		{
+			public bool Equals(DirectoryInfo x, DirectoryInfo y)
+			{
+				return x.FullName.TrimEnd('\\').Equals(y.FullName.TrimEnd('\\'), StringComparison.InvariantCultureIgnoreCase);
+			}
+
+			public int GetHashCode(DirectoryInfo obj)
+			{
+				return obj.FullName.TrimEnd('\\').ToLowerInvariant().GetHashCode();
+			}
+		}
+	}
+}
