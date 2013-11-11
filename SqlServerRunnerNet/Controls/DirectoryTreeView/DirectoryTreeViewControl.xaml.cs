@@ -43,6 +43,7 @@ namespace SqlServerRunnerNet.Controls.DirectoryTreeView
 		public void SetSelectedPath(string path)
 		{
 			Model.SetSelectedFolder(path);
+			FoldersTreeView.Focus();
 		}
 
 		public List<string> GetCheckedFolders()

@@ -22,5 +22,29 @@ namespace SqlServerRunnerNet.Properties {
                 return defaultInstance;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string LastConnectionString {
+            get {
+                return ((string)(this["LastConnectionString"]));
+            }
+            set {
+                this["LastConnectionString"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string LastCommonFolder {
+            get {
+                return ((string)(this["LastCommonFolder"]));
+            }
+            set {
+                this["LastCommonFolder"] = value;
+            }
+        }
     }
 }

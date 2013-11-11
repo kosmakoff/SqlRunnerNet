@@ -27,6 +27,9 @@ namespace SqlServerRunnerNet.Controls.DirectoryTreeView.ViewModel
 
 		public void SetSelectedFolder(string selectedPath)
 		{
+			if (!Directory.Exists(selectedPath))
+				return;
+
 			var folder = EnsureFolder(selectedPath);
 
 			if (folder != null)

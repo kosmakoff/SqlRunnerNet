@@ -1,14 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data.SqlClient;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Linq;
 using System.Windows;
 using System.Windows.Input;
-using SqlServerRunnerNet.Business;
-using SqlServerRunnerNet.Infrastructure;
 using SqlServerRunnerNet.Infrastructure.Commands;
+using SqlServerRunnerNet.Properties;
 using SqlServerRunnerNet.ViewModel;
 
 namespace SqlServerRunnerNet
@@ -73,5 +67,19 @@ namespace SqlServerRunnerNet
 		#endregion
 
 		#endregion
+
+		private void MainWindow_OnLoaded(object sender, RoutedEventArgs e)
+		{
+			Model.ConnectionString = Settings.Default.LastConnectionString;
+			Model.TopLevelScriptsFolder = Settings.Default.LastCommonFolder;
+		}
+
+		private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+		{
+			Settings.Default.LastConnectionString = Model.ConnectionString;
+			Settings.Default.LastCommonFolder = Model.TopLevelScriptsFolder;
+
+			Settings.Default.Save();
+		}
 	}
 }

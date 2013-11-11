@@ -105,6 +105,7 @@
     <Compile Include="Infrastructure\Commands\DelegateCommand.cs" />
     <Compile Include="Infrastructure\Commands\IAsyncCommand.cs" />
     <Compile Include="Infrastructure\Commands\IRaiseCanExecuteChanged.cs" />
+    <Compile Include="Settings.cs" />
     <Compile Include="ViewModel\FileSystemObjectViewModel.cs" />
     <Compile Include="ViewModel\FolderViewModel.cs" />
     <Compile Include="ViewModel\ScriptViewModel.cs" />

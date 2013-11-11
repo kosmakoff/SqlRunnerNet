@@ -132,6 +132,9 @@ namespace SqlServerRunnerNet.Controls.DirectoryTreeView.ViewModel
 			{
 				if (value != _isSelected)
 				{
+					if (value)
+						IsExpanded = true;
+
 					_isSelected = value;
 					OnPropertyChanged();
 				}

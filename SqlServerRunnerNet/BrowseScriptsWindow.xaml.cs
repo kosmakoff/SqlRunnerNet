@@ -46,5 +46,10 @@ namespace SqlServerRunnerNet
 		{
 			DialogResult = true;
 		}
+
+		public void SetTopLevelFolder(string topLevelScriptsFolder)
+		{
+			FoldersTreeViewControl.SetSelectedPath(topLevelScriptsFolder);
+		}
 	}
 }

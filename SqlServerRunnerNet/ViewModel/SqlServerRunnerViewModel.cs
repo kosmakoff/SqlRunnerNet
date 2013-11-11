@@ -63,6 +63,8 @@ namespace SqlServerRunnerNet.ViewModel
 			}
 		}
 
+		public string TopLevelScriptsFolder { get; set; }
+
 		public bool? AllScriptsChecked
 		{
 			get
@@ -135,22 +137,31 @@ namespace SqlServerRunnerNet.ViewModel
 			var existingScriptsInfos = Scripts.Select(script => new DirectoryInfo(script.FilePath)).ToList();
 
 			var browseWindow = new BrowseScriptsWindow(_parent);
+
+			browseWindow.SetTopLevelFolder(TopLevelScriptsFolder);
 			if (browseWindow.ShowDialog() == true)
 			{
 				var newDirectories = browseWindow
 					.SelectedDirectories
-					.Where(info => !existingScriptsInfos.Contains(info, new DirectoryInfoComparer()));
+					.Where(info => !existingScriptsInfos.Contains(info, new DirectoryInfoComparer()))
+					.ToList();
+
+				if (!newDirectories.Any())
+					return;
 
 				foreach (var directoryInfo in newDirectories)
 				{
-					Scripts.Add(new ScriptsFolderViewModel { FilePath = directoryInfo.FullName.TrimEnd('\\'), IsChecked = true });
+					Scripts.Add(new ScriptsFolderViewModel {FilePath = directoryInfo.FullName.TrimEnd('\\'), IsChecked = true});
 				}
+
+				var items = Scripts.ToArray().OrderBy(script => script.FilePath);
+
+				Scripts.Clear();
+				items.ToList().ForEach(Scripts.Add);
+
+				var last = newDirectories.Last();
+				TopLevelScriptsFolder = last.Parent != null ? last.Parent.FullName : last.FullName;
 			}
-
-			var items = Scripts.ToArray().OrderBy(script => script.FilePath);
-
-			Scripts.Clear();
-			items.ToList().ForEach(Scripts.Add);
 		}
 
 		private void RemoveScriptCommandExecute()
