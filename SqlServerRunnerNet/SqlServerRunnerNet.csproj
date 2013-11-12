@@ -251,8 +251,7 @@ copy $(TargetDir)*.* $(SolutionDir)Distrib\
 del /Q $(SolutionDir)Distrib\*.xml
 del /Q $(SolutionDir)Distrib\*.vshost.exe
 del /Q $(SolutionDir)Distrib\*.vshost.exe.config
-del /Q $(SolutionDir)distrib.zip
-$(SolutionDir)Utils\7z.exe a -r -tzip $(SolutionDir)distrib.zip $(SolutionDir)Distrib\*.*</PostBuildEvent>
+</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
