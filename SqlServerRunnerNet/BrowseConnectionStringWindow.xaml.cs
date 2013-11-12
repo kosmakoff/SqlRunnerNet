@@ -40,7 +40,16 @@ namespace SqlServerRunnerNet
 
 		private void SetConnectionString(string connectionString)
 		{
-			var builder = new SqlConnectionStringBuilder(connectionString);
+			SqlConnectionStringBuilder builder;
+
+			try
+			{
+				builder = new SqlConnectionStringBuilder(connectionString);
+			}
+			catch
+			{
+				builder = new SqlConnectionStringBuilder();
+			}
 
 			Model.ServerName = builder.DataSource;
 
