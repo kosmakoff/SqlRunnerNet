@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using SqlServerRunnerNet.Annotations;
 using SqlServerRunnerNet.Infrastructure;
@@ -12,6 +13,7 @@ namespace SqlServerRunnerNet.ViewModel
 		private string _userName;
 		private string _password;
 		private string _databaseName;
+		private ObservableCollection<string> _recentServerNames;
 
 		#region INotifyPropertyChanged interface implementation
 		public event PropertyChangedEventHandler PropertyChanged;
@@ -24,6 +26,11 @@ namespace SqlServerRunnerNet.ViewModel
 		}
 		#endregion
 
+		public ConnectionStringViewModel()
+		{
+			RecentServerNames = new ObservableCollection<string>();
+		}
+
 		public string ServerName
 		{
 			get { return _serverName; }
@@ -31,6 +38,37 @@ namespace SqlServerRunnerNet.ViewModel
 			{
 				if (value == _serverName) return;
 				_serverName = value;
+				OnPropertyChanged();
+			}
+		}
+
+		public string NewServerName
+		{
+			set
+			{
+				var newServerNamePrepared = value.Trim().ToUpper();
+
+				if (!string.IsNullOrWhiteSpace(newServerNamePrepared))
+				{
+					var oldIndex = RecentServerNames.IndexOf(newServerNamePrepared);
+
+					if (oldIndex >= 0)
+						RecentServerNames.RemoveAt(oldIndex);
+
+					RecentServerNames.Insert(0, newServerNamePrepared);
+
+					ServerName = newServerNamePrepared;
+				}
+			}
+		}
+
+		public ObservableCollection<string> RecentServerNames
+		{
+			get { return _recentServerNames; }
+			private set
+			{
+				if (Equals(value, _recentServerNames)) return;
+				_recentServerNames = value;
 				OnPropertyChanged();
 			}
 		}
@@ -54,7 +92,7 @@ namespace SqlServerRunnerNet.ViewModel
 			{
 				if (value == _userName) return;
 				_userName = value;
-				OnPropertyChanged("SqlServerUsername");
+				OnPropertyChanged();
 			}
 		}
 
@@ -73,7 +111,7 @@ namespace SqlServerRunnerNet.ViewModel
 			{
 				if (value == _password) return;
 				_password = value;
-				OnPropertyChanged("Password");
+				OnPropertyChanged();
 			}
 		}
 
@@ -84,7 +122,7 @@ namespace SqlServerRunnerNet.ViewModel
 			{
 				if (value == _databaseName) return;
 				_databaseName = value;
-				OnPropertyChanged("DatabaseName");
+				OnPropertyChanged();
 			}
 		}
 

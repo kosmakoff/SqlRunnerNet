@@ -9,7 +9,7 @@
 	mc:Ignorable="d"
 	x:Class="SqlServerRunnerNet.MainWindow"
 	Title="SQL Runner .NET" Height="480" Width="640" Icon="run.ico"
-	Loaded="MainWindow_OnLoaded" Closing="Window_Closing" >
+	Loaded="Window_OnLoaded" Closing="Window_Closing" >
 	<Window.Resources>
 		<ResourceDictionary>
 			<ResourceDictionary.MergedDictionaries>

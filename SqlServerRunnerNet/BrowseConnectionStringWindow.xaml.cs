@@ -1,5 +1,9 @@
-﻿using System.Data.SqlClient;
+﻿using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using System.Data.SqlClient;
+using System.Linq;
 using System.Windows;
+using Microsoft.SqlServer.Management.Smo;
 using SqlServerRunnerNet.Infrastructure;
 using SqlServerRunnerNet.ViewModel;
 
@@ -28,8 +32,10 @@ namespace SqlServerRunnerNet
 		{
 			InitializeComponent();
 
-			DataContext = Model;
 			Model = new ConnectionStringViewModel();
+			DataContext = Model;
+
+			LoadSettings();
 		}
 
 		public BrowseConnectionStringWindow(Window parent)
@@ -51,7 +57,7 @@ namespace SqlServerRunnerNet
 				builder = new SqlConnectionStringBuilder();
 			}
 
-			Model.ServerName = builder.DataSource;
+			Model.NewServerName = builder.DataSource;
 
 			var isSqlUser = !string.IsNullOrWhiteSpace(connectionString) && !builder.IntegratedSecurity;
 
@@ -104,7 +110,37 @@ namespace SqlServerRunnerNet
 		private void BrowseServersButton_OnClick(object sender, RoutedEventArgs e)
 		{
 			var browserWindow = new ServerBrowserWindow(this);
-			browserWindow.ShowDialog();
+			if (browserWindow.ShowDialog() == true)
+			{
+				Model.NewServerName = browserWindow.SqlServerInstanceName;
+			}
+		}
+
+		private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+		{
+			SaveSettings();
+		}
+		
+		private void LoadSettings()
+		{
+			if (Properties.Settings.Default.RecentServerNames == null)
+				return;
+
+			Model.RecentServerNames.Clear();
+			
+			foreach (var serverName in Properties.Settings.Default.RecentServerNames)
+			{
+				Model.RecentServerNames.Add(serverName);
+			}
+		}
+
+		private void SaveSettings()
+		{
+			if (Properties.Settings.Default.RecentServerNames == null)
+				Properties.Settings.Default.RecentServerNames = new StringCollection();
+
+			Properties.Settings.Default.RecentServerNames.Clear();
+			Properties.Settings.Default.RecentServerNames.AddRange(Model.RecentServerNames.ToArray());
 		}
 	}
 }

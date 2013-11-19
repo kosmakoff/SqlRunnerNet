@@ -6,7 +6,8 @@
         xmlns:local="clr-namespace:SqlServerRunnerNet"
         x:Class="SqlServerRunnerNet.BrowseConnectionStringWindow"
         Title="Connection String" Height="237" Width="360"
-		ShowInTaskbar="False" SizeToContent="Height" ResizeMode="NoResize">
+		ShowInTaskbar="False" SizeToContent="Height" ResizeMode="NoResize"
+		Closing="Window_Closing">
 	<Grid Margin="10">
 		<Grid.ColumnDefinitions>
 			<ColumnDefinition Width="Auto" />
@@ -37,7 +38,10 @@
 				<ColumnDefinition Width="*" />
 				<ColumnDefinition Width="Auto" />
 			</Grid.ColumnDefinitions>
-			<TextBox Grid.Column="0" Text="{Binding Model.ServerName, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:BrowseConnectionStringWindow}}}" />
+			<ComboBox Grid.Column="0" IsEditable="True"
+					  Text="{Binding Model.NewServerName, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:BrowseConnectionStringWindow}}, UpdateSourceTrigger=LostFocus}"
+					  ItemsSource="{Binding Model.RecentServerNames, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:BrowseConnectionStringWindow}}}"
+					  SelectedItem="{Binding Model.ServerName ,RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:BrowseConnectionStringWindow}}}"/>
 			<Button Grid.Column="1" Margin="5,0,0,0" Padding="10,0" Click="BrowseServersButton_OnClick">...</Button>
 		</Grid>
 		<ComboBox Grid.Row="2" Grid.Column="2" ItemsSource="{infrastructure:EnumValues {x:Type infrastructure:AuthenticationType}}"

@@ -110,6 +110,8 @@
     <Compile Include="Infrastructure\Commands\IAsyncCommand.cs" />
     <Compile Include="Infrastructure\Commands\IRaiseCanExecuteChanged.cs" />
     <Compile Include="Settings.cs" />
+    <Compile Include="Utils\SqlServerEnumeration.cs" />
+    <Compile Include="ViewModel\ServerBrowserWindowViewModel.cs" />
     <Compile Include="ViewModel\FileSystemObjectViewModel.cs" />
     <Compile Include="ViewModel\FolderViewModel.cs" />
     <Compile Include="ViewModel\ScriptViewModel.cs" />
@@ -243,6 +245,15 @@
       <ProductName>.NET Framework 3.5 SP1</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <DesignData Include="SampleData\ServerBrowserWindowViewModelSampleData.xaml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\web.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\home.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

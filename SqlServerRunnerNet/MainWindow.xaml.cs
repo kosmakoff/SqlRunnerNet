@@ -68,13 +68,23 @@ namespace SqlServerRunnerNet
 
 		#endregion
 
-		private void MainWindow_OnLoaded(object sender, RoutedEventArgs e)
+		private void Window_OnLoaded(object sender, RoutedEventArgs e)
+		{
+			LoadSettings();
+		}
+
+		private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+		{
+			SaveSettings();
+		}
+
+		private void LoadSettings()
 		{
 			Model.ConnectionString = Settings.Default.LastConnectionString;
 			Model.TopLevelScriptsFolder = Settings.Default.LastCommonFolder;
 		}
 
-		private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+		private void SaveSettings()
 		{
 			Settings.Default.LastConnectionString = Model.ConnectionString;
 			Settings.Default.LastCommonFolder = Model.TopLevelScriptsFolder;

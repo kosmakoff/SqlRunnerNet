@@ -46,5 +46,16 @@ namespace SqlServerRunnerNet.Properties {
                 this["LastCommonFolder"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        public global::System.Collections.Specialized.StringCollection RecentServerNames {
+            get {
+                return ((global::System.Collections.Specialized.StringCollection)(this["RecentServerNames"]));
+            }
+            set {
+                this["RecentServerNames"] = value;
+            }
+        }
     }
 }
