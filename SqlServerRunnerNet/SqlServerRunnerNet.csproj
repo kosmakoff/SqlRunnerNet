@@ -106,9 +106,11 @@
     <Compile Include="Controls\DirectoryTreeView\ViewModel\DirectoryModelCollection.cs" />
     <Compile Include="Infrastructure\Commands\AwaitableDelegateCommand.cs" />
     <Compile Include="Infrastructure\Commands\CommandExtensions.cs" />
+    <Compile Include="Infrastructure\Commands\DelayableCommand.cs" />
     <Compile Include="Infrastructure\Commands\DelegateCommand.cs" />
     <Compile Include="Infrastructure\Commands\IAsyncCommand.cs" />
     <Compile Include="Infrastructure\Commands\IRaiseCanExecuteChanged.cs" />
+    <Compile Include="Infrastructure\Converters\BoolToVisibilityConverter.cs" />
     <Compile Include="Infrastructure\ExtensionMethods.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="Utils\SqlServerEnumeration.cs" />

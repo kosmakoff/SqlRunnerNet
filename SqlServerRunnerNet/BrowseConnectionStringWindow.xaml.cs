@@ -36,8 +36,6 @@ namespace SqlServerRunnerNet
 			DataContext = Model;
 
 			LoadSettings();
-
-			Loaded += (sender, args) => Model.UpdateDatabaseNamesCommand.Execute(new CancellationTokenSource().Token);
 		}
 
 		public BrowseConnectionStringWindow(Window parent)

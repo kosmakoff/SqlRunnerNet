@@ -7,6 +7,8 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Win32;
 
 namespace SqlServerRunnerNet.Utils
@@ -94,21 +96,22 @@ namespace SqlServerRunnerNet.Utils
 				.ToList();
 		}
 
-		public static List<string> GetDatabaseNames(string connectionString)
+		public static async Task<List<string>> GetDatabaseNamesAsync(string connectionString, CancellationToken ct)
 		{
 			try
 			{
-				using (var connection = new SqlConnection(connectionString))
-				using (var dataAdapter = new SqlDataAdapter("SELECT Name FROM master.sys.databases WHERE Name NOT IN ('master', 'tempdb', 'model', 'msdb') AND Name NOT LIKE 'ReportServer$%' ORDER BY Name", connection))
+				var connectionStringAsync = new SqlConnectionStringBuilder(connectionString) {AsynchronousProcessing = true}.ConnectionString;
+
+				using (var connection = new SqlConnection(connectionStringAsync))
+				using (var cmd = new SqlCommand("SELECT Name FROM master.sys.databases WHERE Name NOT IN ('master', 'tempdb', 'model', 'msdb') AND Name NOT LIKE 'ReportServer$%' ORDER BY Name", connection))
 				{
-					var ds = new DataSet();
-					dataAdapter.Fill(ds);
-					return ds.Tables[0].Rows.Cast<DataRow>().Select(x => x["Name"].ToString()).ToList();
+					await connection.OpenAsync(ct);
+					var reader = await cmd.ExecuteReaderAsync(ct);
+					return reader.Cast<IDataRecord>().Select(record => record["Name"].ToString()).ToList();
 				}
 			}
 			catch
 			{
-
 				return new List<string>(0);
 			}
 		}

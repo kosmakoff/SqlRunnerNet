@@ -1,7 +1,7 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Data.SqlClient;
-using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
@@ -27,7 +27,7 @@ namespace SqlServerRunnerNet.ViewModel
 
 		private readonly Window _parentWindow;
 
-		public ICommand UpdateDatabaseNamesCommand { get; private set; }
+		public DelayableCommand UpdateDatabaseNamesDelayableCommand { get; private set; }
 
 		#region INotifyPropertyChanged interface implementation
 		public event PropertyChangedEventHandler PropertyChanged;
@@ -47,7 +47,7 @@ namespace SqlServerRunnerNet.ViewModel
 			RecentServerNames = new ObservableCollection<string>();
 			DatabaseNamesList = new ObservableCollection<string>();
 
-			UpdateDatabaseNamesCommand = new AwaitableDelegateCommand(UpdateDatabaseNamesCommandExecute);
+			UpdateDatabaseNamesDelayableCommand = new DelayableCommand(DoUpdateDatabasesList, TimeSpan.FromSeconds(1));
 		}
 
 		public string ServerName
@@ -184,15 +184,12 @@ namespace SqlServerRunnerNet.ViewModel
 			}
 		}
 
-		private async Task UpdateDatabaseNamesCommandExecute()
-		{
-			DoUpdateDatabasesList();
-		}
-
-		public void DoUpdateDatabasesList()
+		private async Task DoUpdateDatabasesList(CancellationToken ct)
 		{
 			try
 			{
+				_parentWindow.Dispatcher.Invoke(() => DatabaseNamesList.Clear());
+
 				var connectionStringBuilder = new SqlConnectionStringBuilder {DataSource = ServerName};
 
 				if (AuthenticationType == AuthenticationType.WindowsAuthentication)
@@ -208,12 +205,10 @@ namespace SqlServerRunnerNet.ViewModel
 
 				var connectionString = connectionStringBuilder.ConnectionString;
 
-				var list = SqlServerEnumeration.GetDatabaseNames(connectionString);
+				var list = await SqlServerEnumeration.GetDatabaseNamesAsync(connectionString, ct);
 
 				_parentWindow.Dispatcher.Invoke(() =>
 				{
-					DatabaseNamesList.Clear();
-
 					if (!list.Any())
 						return;
 
@@ -228,7 +223,7 @@ namespace SqlServerRunnerNet.ViewModel
 			}
 			catch
 			{
-				
+				// whatever happens here - we don't care
 			}
 		}
 	}
