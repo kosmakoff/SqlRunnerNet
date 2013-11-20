@@ -51,7 +51,7 @@ namespace SqlServerRunnerNet
 		{
 			get
 			{
-				var instance = listBox.SelectedItem as SqlServerInstance;
+				var instance = ListBox.SelectedItem as SqlServerInstance;
 				return instance != null ? instance.ToString() : string.Empty;
 			}
 		}

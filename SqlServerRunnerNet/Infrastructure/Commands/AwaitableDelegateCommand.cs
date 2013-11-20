@@ -1,4 +1,6 @@
 ﻿using System;
+using System.ComponentModel;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
@@ -22,17 +24,15 @@ namespace SqlServerRunnerNet.Infrastructure.Commands
 		private readonly Func<T, Task> _executeMethod;
 		private readonly DelegateCommand<T> _underlyingCommand;
 
-		public delegate void CancelCommandEventHandler(object sender, CancelCommandEventArgs eventArgs);
-
 		public delegate void CommandEventHandler(object sender);
 
-		public event CancelCommandEventHandler Executing;
+		public event CancelEventHandler Executing;
 
 		public event CommandEventHandler Executed;
 
-		protected virtual void OnExecuting(CancelCommandEventArgs eventargs)
+		protected virtual void OnExecuting(CancelEventArgs eventargs)
 		{
-			CancelCommandEventHandler handler = Executing;
+			CancelEventHandler handler = Executing;
 			if (handler != null) handler(this, eventargs);
 		}
 
@@ -55,10 +55,10 @@ namespace SqlServerRunnerNet.Infrastructure.Commands
 		}
 
 		public bool IsExecuting { get; private set; }
-		
+
 		public async Task ExecuteAsync(T obj)
 		{
-			var args = new CancelCommandEventArgs();
+			var args = new CancelEventArgs();
 			OnExecuting(args);
 
 			if (args.Cancel)
@@ -68,6 +68,7 @@ namespace SqlServerRunnerNet.Infrastructure.Commands
 			{
 				IsExecuting = true;
 				RaiseCanExecuteChanged();
+
 				await _executeMethod(obj);
 			}
 			finally
@@ -83,7 +84,7 @@ namespace SqlServerRunnerNet.Infrastructure.Commands
 
 		public bool CanExecute(object parameter)
 		{
-			return !IsExecuting && _underlyingCommand.CanExecute((T)parameter);
+			return !IsExecuting && _underlyingCommand.CanExecute((T) parameter);
 		}
 
 		public event EventHandler CanExecuteChanged
@@ -101,16 +102,5 @@ namespace SqlServerRunnerNet.Infrastructure.Commands
 		{
 			_underlyingCommand.RaiseCanExecuteChanged();
 		}
-
-		public class CancelCommandEventArgs : EventArgs
-		{
-			public bool Cancel { get; set; }
-
-			public CancelCommandEventArgs()
-			{
-				Cancel = false;
-			}
-		}
-
 	}
 }

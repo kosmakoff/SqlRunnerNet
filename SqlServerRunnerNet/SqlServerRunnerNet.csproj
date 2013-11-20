@@ -109,6 +109,7 @@
     <Compile Include="Infrastructure\Commands\DelegateCommand.cs" />
     <Compile Include="Infrastructure\Commands\IAsyncCommand.cs" />
     <Compile Include="Infrastructure\Commands\IRaiseCanExecuteChanged.cs" />
+    <Compile Include="Infrastructure\ExtensionMethods.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="Utils\SqlServerEnumeration.cs" />
     <Compile Include="ViewModel\ServerBrowserWindowViewModel.cs" />
@@ -208,12 +209,6 @@
     <AppDesigner Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\WpfHelpers\WpfHelpers.csproj">
-      <Project>{6F904861-BCED-43CE-87C4-313ABA472B10}</Project>
-      <Name>WpfHelpers</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="run.ico" />
   </ItemGroup>
   <ItemGroup>
@@ -245,9 +240,6 @@
       <ProductName>.NET Framework 3.5 SP1</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
-  </ItemGroup>
-  <ItemGroup>
-    <DesignData Include="SampleData\ServerBrowserWindowViewModelSampleData.xaml" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\web.png" />

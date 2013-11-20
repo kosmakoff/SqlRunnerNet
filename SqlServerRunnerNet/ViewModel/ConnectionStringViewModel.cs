@@ -1,8 +1,17 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Data.SqlClient;
+using System.Diagnostics;
+using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Input;
 using SqlServerRunnerNet.Annotations;
 using SqlServerRunnerNet.Infrastructure;
+using SqlServerRunnerNet.Infrastructure.Commands;
+using SqlServerRunnerNet.Utils;
 
 namespace SqlServerRunnerNet.ViewModel
 {
@@ -14,6 +23,11 @@ namespace SqlServerRunnerNet.ViewModel
 		private string _password;
 		private string _databaseName;
 		private ObservableCollection<string> _recentServerNames;
+		private ObservableCollection<string> _databaseNamesList;
+
+		private readonly Window _parentWindow;
+
+		public ICommand UpdateDatabaseNamesCommand { get; private set; }
 
 		#region INotifyPropertyChanged interface implementation
 		public event PropertyChangedEventHandler PropertyChanged;
@@ -26,9 +40,14 @@ namespace SqlServerRunnerNet.ViewModel
 		}
 		#endregion
 
-		public ConnectionStringViewModel()
+		public ConnectionStringViewModel(Window parentWindow)
 		{
+			_parentWindow = parentWindow;
+
 			RecentServerNames = new ObservableCollection<string>();
+			DatabaseNamesList = new ObservableCollection<string>();
+
+			UpdateDatabaseNamesCommand = new AwaitableDelegateCommand(UpdateDatabaseNamesCommandExecute);
 		}
 
 		public string ServerName
@@ -100,7 +119,11 @@ namespace SqlServerRunnerNet.ViewModel
 		{
 			get
 			{
-				return System.Security.Principal.WindowsIdentity.GetCurrent().Name;
+				var windowsIdentity = System.Security.Principal.WindowsIdentity.GetCurrent();
+				if (windowsIdentity != null)
+					return windowsIdentity.Name;
+
+				return string.Empty;
 			}
 		}
 
@@ -126,11 +149,86 @@ namespace SqlServerRunnerNet.ViewModel
 			}
 		}
 
+		public string NewDatabaseName
+		{
+			set
+			{
+				var newDatabaseName = value.Trim();
+
+				if (!string.IsNullOrWhiteSpace(newDatabaseName))
+				{
+					if (DatabaseNamesList.IndexOfIgnoreCase(newDatabaseName) < 0)
+						DatabaseNamesList.Add(newDatabaseName);
+					
+					DatabaseName = newDatabaseName;
+				}
+			}
+		}
+
+		public ObservableCollection<string> DatabaseNamesList
+		{
+			get { return _databaseNamesList; }
+			private set
+			{
+				if (Equals(value, _databaseNamesList)) return;
+				_databaseNamesList = value;
+				OnPropertyChanged();
+			}
+		}
+
 		public bool IsSqlServerUser
 		{
 			get
 			{
 				return AuthenticationType == AuthenticationType.SqlServerAuthentication;
+			}
+		}
+
+		private async Task UpdateDatabaseNamesCommandExecute()
+		{
+			DoUpdateDatabasesList();
+		}
+
+		public void DoUpdateDatabasesList()
+		{
+			try
+			{
+				var connectionStringBuilder = new SqlConnectionStringBuilder {DataSource = ServerName};
+
+				if (AuthenticationType == AuthenticationType.WindowsAuthentication)
+				{
+					connectionStringBuilder.IntegratedSecurity = true;
+				}
+				else
+				{
+					connectionStringBuilder.IntegratedSecurity = false;
+					connectionStringBuilder.UserID = SqlServerUsername;
+					connectionStringBuilder.Password = Password;
+				}
+
+				var connectionString = connectionStringBuilder.ConnectionString;
+
+				var list = SqlServerEnumeration.GetDatabaseNames(connectionString);
+
+				_parentWindow.Dispatcher.Invoke(() =>
+				{
+					DatabaseNamesList.Clear();
+
+					if (!list.Any())
+						return;
+
+					foreach (var name in list)
+					{
+						DatabaseNamesList.Add(name);
+					}
+
+					if (DatabaseNamesList.IndexOfIgnoreCase(DatabaseName) < 0)
+						DatabaseName = list.First();
+				});
+			}
+			catch
+			{
+				
 			}
 		}
 	}

@@ -1,9 +1,9 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
 using System.Collections.Specialized;
 using System.Data.SqlClient;
 using System.Linq;
+using System.Threading;
 using System.Windows;
-using Microsoft.SqlServer.Management.Smo;
 using SqlServerRunnerNet.Infrastructure;
 using SqlServerRunnerNet.ViewModel;
 
@@ -32,10 +32,12 @@ namespace SqlServerRunnerNet
 		{
 			InitializeComponent();
 
-			Model = new ConnectionStringViewModel();
+			Model = new ConnectionStringViewModel(this);
 			DataContext = Model;
 
 			LoadSettings();
+
+			Loaded += (sender, args) => Model.UpdateDatabaseNamesCommand.Execute(new CancellationTokenSource().Token);
 		}
 
 		public BrowseConnectionStringWindow(Window parent)

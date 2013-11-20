@@ -7,8 +7,7 @@
 		xmlns:sqlServerRunnerNet="clr-namespace:SqlServerRunnerNet"
 		xmlns:utils="clr-namespace:SqlServerRunnerNet.Utils"
 		mc:Ignorable="d"
-        Title="Servers" Height="400" Width="350" ShowInTaskbar="False"
-		d:DataContext="{d:DesignData /SampleData/ServerBrowserWindowViewModelSampleData.xaml}">
+        Title="Servers" Height="400" Width="350" ShowInTaskbar="False">
 	<Window.Resources>
 		<CollectionViewSource x:Key="LocalInstancesCollection" Source="{Binding LocalInstancesCollection}" />
 		<CollectionViewSource x:Key="RemoteInstancesCollection" Source="{Binding RemoteInstancesCollection}" />
@@ -18,7 +17,7 @@
 			<RowDefinition Height="*" />
 			<RowDefinition Height="Auto" />
 		</Grid.RowDefinitions>
-		<ListBox x:Name="listBox" Grid.Row="0" ScrollViewer.HorizontalScrollBarVisibility="Hidden" ScrollViewer.VerticalScrollBarVisibility="Auto">
+		<ListBox x:Name="ListBox" Grid.Row="0" ScrollViewer.HorizontalScrollBarVisibility="Hidden" ScrollViewer.VerticalScrollBarVisibility="Auto">
 			<ListBox.ItemsSource>
 				<CompositeCollection>
 					<CollectionContainer Collection="{Binding Source={StaticResource LocalInstancesCollection}}" />
@@ -42,20 +41,18 @@
 				<DataTemplate DataType="utils:SqlServerInstance">
 					<StackPanel Orientation="Horizontal" Margin="2">
 						<Image x:Name="SqlServerInstanceImage" Source="/SqlServerRunnerNet;component/Images/web.png" Margin="0,0,5,0" />
-						<TextBlock Text="{Binding ServerName}"/>
-						<TextBlock Text="\"></TextBlock>
-						<TextBlock Text="{Binding InstanceName}" />
+						<TextBlock Text="{Binding}"/>
 					</StackPanel>
 					<DataTemplate.Triggers>
 						<DataTrigger Binding="{Binding IsLocal}" Value="True">
-							<Setter TargetName="SqlServerInstanceImage" Property="Source" Value="/SqlServerRunnerNet;component/Images/home.png"></Setter>
+							<Setter TargetName="SqlServerInstanceImage" Property="Source" Value="/SqlServerRunnerNet;component/Images/home.png" />
 						</DataTrigger>
 					</DataTemplate.Triggers>
 				</DataTemplate>
 			</ListBox.ItemTemplate>
 		</ListBox>
 		<StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,5,0,0" HorizontalAlignment="Center">
-			<Button IsDefault="True" Click="OkButton_OnClick" Padding="15,3" IsEnabled="{Binding SelectedItems.Count, ElementName=listBox, Mode=OneWay}">OK</Button>
+			<Button IsDefault="True" Click="OkButton_OnClick" Padding="15,3" IsEnabled="{Binding SelectedItems.Count, ElementName=ListBox, Mode=OneWay}">OK</Button>
 			<Button IsCancel="True" Padding="15,3">Cancel</Button>
 		</StackPanel>
 	</Grid>

@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -91,6 +93,25 @@ namespace SqlServerRunnerNet.Utils
 				.ThenBy(instance => instance.InstanceName)
 				.ToList();
 		}
+
+		public static List<string> GetDatabaseNames(string connectionString)
+		{
+			try
+			{
+				using (var connection = new SqlConnection(connectionString))
+				using (var dataAdapter = new SqlDataAdapter("SELECT Name FROM master.sys.databases WHERE Name NOT IN ('master', 'tempdb', 'model', 'msdb') AND Name NOT LIKE 'ReportServer$%' ORDER BY Name", connection))
+				{
+					var ds = new DataSet();
+					dataAdapter.Fill(ds);
+					return ds.Tables[0].Rows.Cast<DataRow>().Select(x => x["Name"].ToString()).ToList();
+				}
+			}
+			catch
+			{
+
+				return new List<string>(0);
+			}
+		}
 	}
 
 	public class SqlServerInstance
@@ -129,7 +150,7 @@ namespace SqlServerRunnerNet.Utils
 
 		public override string ToString()
 		{
-			return string.Format(@"{0}\{1}", ServerName, InstanceName);
+			return !string.IsNullOrWhiteSpace(InstanceName) ? string.Format(@"{0}\{1}", ServerName, InstanceName) : ServerName;
 		}
 
 		private sealed class ServerNameInstanceNameIsLocalEqualityComparer : IEqualityComparer<SqlServerInstance>
@@ -148,8 +169,8 @@ namespace SqlServerRunnerNet.Utils
 				unchecked
 				{
 					int hashCode = (obj.ServerName != null ? obj.ServerName.GetHashCode() : 0);
-					hashCode = (hashCode*397) ^ (obj.InstanceName != null ? obj.InstanceName.GetHashCode() : 0);
-					hashCode = (hashCode*397) ^ obj.IsLocal.GetHashCode();
+					hashCode = (hashCode * 397) ^ (obj.InstanceName != null ? obj.InstanceName.GetHashCode() : 0);
+					hashCode = (hashCode * 397) ^ obj.IsLocal.GetHashCode();
 					return hashCode;
 				}
 			}

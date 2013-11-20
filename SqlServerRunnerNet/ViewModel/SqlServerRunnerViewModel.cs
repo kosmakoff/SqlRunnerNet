@@ -6,6 +6,7 @@ using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
@@ -184,8 +185,10 @@ namespace SqlServerRunnerNet.ViewModel
 			return Scripts.Any();
 		}
 
-		private Task RunSelectedScriptsCommandExecute()
+		private async Task RunSelectedScriptsCommandExecute()
 		{
+			bool isError = false;
+
 			try
 			{
 				if (string.IsNullOrWhiteSpace(ConnectionString))
@@ -196,7 +199,7 @@ namespace SqlServerRunnerNet.ViewModel
 			catch
 			{
 				MessageBox.Show(_parent, "Invalid connection string", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-				return Task.Run(() => { });
+				isError = true;
 			}
 
 			// and here we try to establish the connection
@@ -212,10 +215,13 @@ namespace SqlServerRunnerNet.ViewModel
 			{
 				MessageBox.Show(_parent, "Cannot establish the connection to the server", "Error", MessageBoxButton.OK,
 					MessageBoxImage.Error);
-				return Task.Run(() => { });
+				isError = true;
 			}
 
-			return Task.Run(() =>
+			if (isError)
+				await Task.Yield();
+
+			await Task.Factory.StartNew(() =>
 			{
 
 				// main part of the APP
