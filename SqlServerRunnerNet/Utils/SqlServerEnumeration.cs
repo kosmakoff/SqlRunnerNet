@@ -15,7 +15,7 @@ namespace SqlServerRunnerNet.Utils
 {
 	public static class SqlServerEnumeration
 	{
-		private static Regex PatternRegex = new Regex(@"^ServerName;(?<server>\w+);InstanceName;(?<instance>\w+);.*", RegexOptions.Compiled);
+		private static readonly Regex PatternRegex = new Regex(@"^ServerName;(?<server>\w+);InstanceName;(?<instance>\w+);.*", RegexOptions.Compiled);
 
 		public static List<SqlServerInstance> EnumLocalInstances()
 		{
@@ -141,11 +141,9 @@ namespace SqlServerRunnerNet.Utils
 
 		public static SqlServerInstance CreateLocal(string instanceName)
 		{
-			var localComputerName = Environment.MachineName;
-
 			return new SqlServerInstance
 			{
-				ServerName = localComputerName,
+				ServerName = "localhost",
 				InstanceName = instanceName.ToUpper(),
 				IsLocal = true
 			};
