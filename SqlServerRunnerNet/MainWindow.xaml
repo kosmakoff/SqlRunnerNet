@@ -9,7 +9,8 @@
 	mc:Ignorable="d"
 	x:Class="SqlServerRunnerNet.MainWindow"
 	Title="SQL Runner .NET" Height="480" Width="640" Icon="run.ico"
-	Loaded="Window_OnLoaded" Closing="Window_Closing" >
+	Loaded="Window_OnLoaded" Closing="Window_Closing"
+	SnapsToDevicePixels="False">
 	<Window.Resources>
 		<ResourceDictionary>
 			<ResourceDictionary.MergedDictionaries>
@@ -97,6 +98,16 @@
 						<Button Command="{Binding Model.AddScriptCommand, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" Content="Add" />
 						<Button Command="{Binding Model.RemoveScriptCommand, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" Content="Remove"/>
 						<Button Command="{Binding Model.ClearScriptsCommand, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" Content="Clear"/>
+						<Grid>
+							<Grid.ColumnDefinitions>
+								<ColumnDefinition />
+								<ColumnDefinition />
+							</Grid.ColumnDefinitions>
+							<Button Grid.Column="0" Content="Up" Margin="3,1.5,1.5,1.5"
+									Command="{Binding Model.MoveScriptUpCommand, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}"/>
+							<Button Grid.Column="1" Content="Down" Margin="1.5,1.5,3,1.5"
+									Command="{Binding Model.MoveScriptDownCommand, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}"/>
+						</Grid>
 						<Button Command="{Binding Model.RunSelectedScriptsCommand, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" Content="Run Selected" />
 					</StackPanel>
 				</Grid>

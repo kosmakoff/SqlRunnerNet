@@ -44,6 +44,8 @@ namespace SqlServerRunnerNet.ViewModel
 			AddScriptCommand = new DelegateCommand(AddScriptCommandExecute);
 			RemoveScriptCommand = new DelegateCommand(RemoveScriptCommandExecute, RemoveScriptCommandCanExecute);
 			ClearScriptsCommand = new DelegateCommand(ClearScriptsCommandExecute, ClearScriptsCommandCanExecute);
+			MoveScriptUpCommand = new DelegateCommand(MoveScriptUpCommandExecute, MoveScriptUpCommandCanExecute);
+			MoveScriptDownCommand = new DelegateCommand(MoveScriptDownCommandExecute, MoveScriptDownCommandCanExecute);
 			RunSelectedScriptsCommand = new AwaitableDelegateCommand(RunSelectedScriptsCommandExecute, RunSelectedScriptsCommandCanExecute);
 		}
 
@@ -127,6 +129,10 @@ namespace SqlServerRunnerNet.ViewModel
 
 		public ICommand ClearScriptsCommand { get; private set; }
 
+		public ICommand MoveScriptUpCommand { get; private set; }
+		
+		public ICommand MoveScriptDownCommand { get; private set; }
+
 		public ICommand RunSelectedScriptsCommand { get; private set; }
 
 		#endregion
@@ -155,11 +161,6 @@ namespace SqlServerRunnerNet.ViewModel
 					Scripts.Add(new ScriptsFolderViewModel {FilePath = directoryInfo.FullName.TrimEnd('\\'), IsChecked = true});
 				}
 
-				var items = Scripts.ToArray().OrderBy(script => script.FilePath);
-
-				Scripts.Clear();
-				items.ToList().ForEach(Scripts.Add);
-
 				var last = newDirectories.Last();
 				TopLevelScriptsFolder = last.Parent != null ? last.Parent.FullName : last.FullName;
 			}
@@ -183,6 +184,36 @@ namespace SqlServerRunnerNet.ViewModel
 		private bool ClearScriptsCommandCanExecute()
 		{
 			return Scripts.Any();
+		}
+
+		private void MoveScriptUpCommandExecute()
+		{
+			var scriptToMove = Scripts.Single(script => script.IsSelected);
+			var index = Scripts.IndexOf(scriptToMove);
+
+			Scripts.RemoveAt(index);
+			Scripts.Insert(index - 1, scriptToMove);
+		}
+
+		private void MoveScriptDownCommandExecute()
+		{
+			var scriptToMove = Scripts.Single(script => script.IsSelected);
+			var index = Scripts.IndexOf(scriptToMove);
+
+			Scripts.RemoveAt(index);
+			Scripts.Insert(index + 1, scriptToMove);
+		}
+
+		private bool MoveScriptUpCommandCanExecute()
+		{
+			return Scripts.Count(script => script.IsSelected) == 1 &&
+			       Scripts.IndexOf(Scripts.Single(script => script.IsSelected)) > 0;
+		}
+
+		private bool MoveScriptDownCommandCanExecute()
+		{
+			return Scripts.Count(script => script.IsSelected) == 1 &&
+			       Scripts.IndexOf(Scripts.Single(script => script.IsSelected)) < Scripts.Count - 1;
 		}
 
 		private async Task RunSelectedScriptsCommandExecute()
@@ -226,7 +257,7 @@ namespace SqlServerRunnerNet.ViewModel
 
 				// main part of the APP
 
-				foreach (var scriptFolder in Scripts)
+				foreach (var scriptFolder in Scripts.Where(script=>script.IsChecked))
 				{
 					var path = scriptFolder.FilePath;
 					var di = new DirectoryInfo(path);

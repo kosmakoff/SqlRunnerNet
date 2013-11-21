@@ -5,7 +5,7 @@
 		<Setter Property="Padding" Value="5" />
 	</Style>
 	<Style TargetType="Button">
-		<Setter Property="Margin" Value="3" />
+		<Setter Property="Margin" Value="3,1.5" />
 		<Setter Property="Padding" Value="3" />
 	</Style>
 	<Style TargetType="TextBox">
