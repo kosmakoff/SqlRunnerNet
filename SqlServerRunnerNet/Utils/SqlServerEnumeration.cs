@@ -15,7 +15,7 @@ namespace SqlServerRunnerNet.Utils
 {
 	public static class SqlServerEnumeration
 	{
-		private static readonly Regex PatternRegex = new Regex(@"^ServerName;(?<server>\w+);InstanceName;(?<instance>\w+);.*", RegexOptions.Compiled);
+        private static readonly Regex PatternRegex = new Regex(@"^ServerName;(?<server>[\w-\.]+);InstanceName;(?<instance>\w+);.*", RegexOptions.Compiled);
 
 		public static List<SqlServerInstance> EnumLocalInstances()
 		{

@@ -27,10 +27,13 @@
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
     <InstallUrl>http://sqlrunnerdotnet.codeplex.com/releases/clickonce/</InstallUrl>
+    <SupportUrl>https://sqlrunnerdotnet.codeplex.com/</SupportUrl>
+    <ErrorReportUrl>https://sqlrunnerdotnet.codeplex.com/workitem/list/basic</ErrorReportUrl>
+    <ProductName>SQL Server Runner .NET</ProductName>
     <PublisherName>Oleg Kosmakov</PublisherName>
-    <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>3</ApplicationRevision>
+    <OpenBrowserOnPublish>false</OpenBrowserOnPublish>
+    <ApplicationRevision>4</ApplicationRevision>
     <ApplicationVersion>0.1.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
