@@ -73,7 +73,8 @@
     <ManifestCertificateThumbprint>844231899FF2BA61FAF1D642E4C47A09D259BB8E</ManifestCertificateThumbprint>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestKeyFile></ManifestKeyFile>
+    <ManifestKeyFile>
+    </ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
     <GenerateManifests>true</GenerateManifests>
