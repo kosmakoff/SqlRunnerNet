@@ -9,26 +9,35 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 using Microsoft.Win32;
+using SqlServerRunnerNet.Utils.Logging;
 
 namespace SqlServerRunnerNet.Utils
 {
 	public static class SqlServerEnumeration
 	{
-        private static readonly Regex PatternRegex = new Regex(@"^ServerName;(?<server>[\w-\.]+);InstanceName;(?<instance>\w+);.*", RegexOptions.Compiled);
+		private static readonly Regex PatternRegex = new Regex(@"^ServerName;(?<server>[\w-\.]+);InstanceName;(?<instance>\w+);.*", RegexOptions.Compiled);
 
 		public static List<SqlServerInstance> EnumLocalInstances()
 		{
 			var retVal = new List<SqlServerInstance>();
 
-			var registryView = Environment.Is64BitOperatingSystem ? RegistryView.Registry64 : RegistryView.Registry32;
-			using (var hklm = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, registryView))
+			try
 			{
-				var instanceKey = hklm.OpenSubKey(@"SOFTWARE\Microsoft\Microsoft SQL Server\Instance Names\SQL", false);
-				if (instanceKey != null)
+				var registryView = Environment.Is64BitOperatingSystem ? RegistryView.Registry64 : RegistryView.Registry32;
+				using (var hklm = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, registryView))
 				{
-					retVal.AddRange(instanceKey.GetValueNames().Select(SqlServerInstance.CreateLocal));
+					var instanceKey = hklm.OpenSubKey(@"SOFTWARE\Microsoft\Microsoft SQL Server\Instance Names\SQL", false);
+					if (instanceKey != null)
+					{
+						retVal.AddRange(instanceKey.GetValueNames().Select(SqlServerInstance.CreateLocal));
+					}
 				}
+			}
+			catch (Exception ex)
+			{
+				LogWrapper.WriteError(ex.ToString());
 			}
 
 			return retVal;
@@ -37,11 +46,11 @@ namespace SqlServerRunnerNet.Utils
 		public static List<SqlServerInstance> EnumRemoteInstances()
 		{
 			var socket = new Socket(AddressFamily.InterNetworkV6, SocketType.Dgram, ProtocolType.Udp)
-			{
-				EnableBroadcast = true,
-				ReceiveTimeout = 1000,
-				DualMode = true
-			};
+				{
+					EnableBroadcast = true,
+					ReceiveTimeout = 1000,
+					DualMode = true
+				};
 
 			var bytes = new List<byte>(4096);
 
@@ -54,7 +63,7 @@ namespace SqlServerRunnerNet.Utils
 				socket.SendTo(msg, ipv6ep);
 
 				int cnt = 0;
-				byte[] byteBuffer = new byte[256];
+				byte[] byteBuffer = new byte[4096];
 
 				do
 				{
@@ -74,7 +83,8 @@ namespace SqlServerRunnerNet.Utils
 				}
 				else
 				{
-					throw;
+					LogWrapper.WriteError(sex.ToString());
+					return new List<SqlServerInstance>();
 				}
 			}
 			finally
@@ -100,7 +110,7 @@ namespace SqlServerRunnerNet.Utils
 		{
 			try
 			{
-				var connectionStringAsync = new SqlConnectionStringBuilder(connectionString) {AsynchronousProcessing = true}.ConnectionString;
+				var connectionStringAsync = new SqlConnectionStringBuilder(connectionString) { AsynchronousProcessing = true }.ConnectionString;
 
 				using (var connection = new SqlConnection(connectionStringAsync))
 				using (var cmd = new SqlCommand("SELECT Name FROM master.sys.databases WHERE Name NOT IN ('master', 'tempdb', 'model', 'msdb') AND Name NOT LIKE 'ReportServer$%' ORDER BY Name", connection))
