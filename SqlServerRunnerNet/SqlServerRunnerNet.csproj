@@ -135,6 +135,7 @@
     <Compile Include="Commands\ScriptsCommands.cs" />
     <Compile Include="Controls\Common\VirtualToggleButton.cs" />
     <Compile Include="Controls\DirectoryTreeView\ViewModel\DirectoryModelCollection.cs" />
+    <Compile Include="Infrastructure\Behaviors\PasswordBehavior.cs" />
     <Compile Include="Infrastructure\Commands\AwaitableDelegateCommand.cs" />
     <Compile Include="Infrastructure\Commands\CommandExtensions.cs" />
     <Compile Include="Infrastructure\Commands\DelayableCommand.cs" />
@@ -142,6 +143,7 @@
     <Compile Include="Infrastructure\Commands\IAsyncCommand.cs" />
     <Compile Include="Infrastructure\Commands\IRaiseCanExecuteChanged.cs" />
     <Compile Include="Infrastructure\Converters\BoolToVisibilityConverter.cs" />
+    <Compile Include="Infrastructure\Converters\EnumValueToDescriptionConverter.cs" />
     <Compile Include="Infrastructure\ExtensionMethods.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="Utils\Logging\ILog.cs" />
@@ -157,8 +159,6 @@
     <Compile Include="ViewModel\SqlServerRunnerViewModel.cs" />
     <Compile Include="Infrastructure\AuthenticationType.cs" />
     <Compile Include="Infrastructure\EnumValues.cs" />
-    <Compile Include="Infrastructure\EnumValueToDescriptionConverter.cs" />
-    <Compile Include="Infrastructure\PasswordBehavior.cs" />
     <Compile Include="Infrastructure\TrulyObservableCollection.cs" />
     <Compile Include="ServerBrowserWindow.xaml.cs">
       <DependentUpon>ServerBrowserWindow.xaml</DependentUpon>
