@@ -145,6 +145,7 @@
     <Compile Include="Infrastructure\Converters\BoolToVisibilityConverter.cs" />
     <Compile Include="Infrastructure\Converters\EnumValueToDescriptionConverter.cs" />
     <Compile Include="Infrastructure\ExtensionMethods.cs" />
+    <Compile Include="Infrastructure\StringWithNumericsComparer.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="Utils\Logging\ILog.cs" />
     <Compile Include="Utils\Logging\LogWrapper.cs" />

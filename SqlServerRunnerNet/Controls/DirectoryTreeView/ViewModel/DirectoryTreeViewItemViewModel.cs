@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using SqlServerRunnerNet.Annotations;
 using SqlServerRunnerNet.Controls.DirectoryTreeView.Data;
+using SqlServerRunnerNet.Infrastructure;
 using SqlServerRunnerNet.Utils;
 
 namespace SqlServerRunnerNet.Controls.DirectoryTreeView.ViewModel
@@ -199,18 +199,17 @@ namespace SqlServerRunnerNet.Controls.DirectoryTreeView.ViewModel
 		/// </summary>
 		protected virtual void LoadChildren()
 		{
-			foreach (var dirInfo in new DirectoryInfo(FullPath).GetDirectories())
-			{
-				// check if we have access to this folder by simply trying to enumerate it's subdirectories
-				if (FileSystemUtils.CanReadDirectory(dirInfo.FullName))
-					Children.Add(new FolderViewModel(new Folder(dirInfo.FullName), this));
-			}
+			Children.AddRange(
+				new DirectoryInfo(FullPath).EnumerateDirectories()
+					.Where(dirInfo => FileSystemUtils.CanReadDirectory(dirInfo.FullName))
+					.OrderBy(dirInfo => dirInfo.Name, new StringWithNumericsComparer())
+					.Select(dirInfo => new FolderViewModel(new Folder(dirInfo.FullName), this)));
 
 			foreach (FolderViewModel model in Children)
 			{
 				var dirInfo = new DirectoryInfo(model.FullPath);
 
-				if (!FileSystemUtils.CanReadDirectory(dirInfo.FullName) || !dirInfo.GetDirectories().Any())
+				if (!FileSystemUtils.CanReadDirectory(dirInfo.FullName) || !dirInfo.EnumerateDirectories().Any())
 					model.Children.Clear();
 			}
 		}
