@@ -2,7 +2,7 @@
 using System.Windows.Controls;
 using System.Windows.Interactivity;
 
-namespace SqlServerRunnerNet.Infrastructure
+namespace SqlServerRunnerNet.Infrastructure.Behaviors
 {
 	public class PasswordBehavior : Behavior<PasswordBox>
 	{

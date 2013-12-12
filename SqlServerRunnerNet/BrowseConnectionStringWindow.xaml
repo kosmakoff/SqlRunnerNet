@@ -5,6 +5,7 @@
         xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
         xmlns:local="clr-namespace:SqlServerRunnerNet"
         xmlns:converters="clr-namespace:SqlServerRunnerNet.Infrastructure.Converters"
+        xmlns:behaviors="clr-namespace:SqlServerRunnerNet.Infrastructure.Behaviors"
         x:Class="SqlServerRunnerNet.BrowseConnectionStringWindow"
         Title="Connection String" Height="237" Width="360"
 		ShowInTaskbar="False" SizeToContent="Height" ResizeMode="NoResize"
@@ -58,7 +59,7 @@
 		<ComboBox Grid.Row="2" Grid.Column="2" ItemsSource="{infrastructure:EnumValues {x:Type infrastructure:AuthenticationType}}"
 				  SelectedItem="{Binding Model.AuthenticationType, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:BrowseConnectionStringWindow}}}">
 			<ComboBox.Resources>
-				<infrastructure:EnumValueToDescriptionConverter x:Key="DescriptionConverter" />
+				<converters:EnumValueToDescriptionConverter x:Key="DescriptionConverter" />
 			</ComboBox.Resources>
 			<ComboBox.ItemTemplate>
 				<DataTemplate>
@@ -93,7 +94,7 @@
 		</TextBox>
 		<PasswordBox Grid.Row="6" Grid.Column="2" VerticalContentAlignment="Center" x:Name="PasswordBox">
 			<i:Interaction.Behaviors>
-				<infrastructure:PasswordBehavior Password="{Binding Model.Password, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:BrowseConnectionStringWindow}}, Mode=TwoWay}" />
+				<behaviors:PasswordBehavior Password="{Binding Model.Password, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:BrowseConnectionStringWindow}}, Mode=TwoWay}" />
 			</i:Interaction.Behaviors>
 			<i:Interaction.Triggers>
 				<i:EventTrigger EventName="PasswordChanged">

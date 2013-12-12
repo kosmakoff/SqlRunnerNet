@@ -4,7 +4,7 @@ using System.Globalization;
 using System.Linq;
 using System.Windows.Data;
 
-namespace SqlServerRunnerNet.Infrastructure
+namespace SqlServerRunnerNet.Infrastructure.Converters
 {
 	public sealed class EnumValueToDescriptionConverter : IValueConverter
 	{
