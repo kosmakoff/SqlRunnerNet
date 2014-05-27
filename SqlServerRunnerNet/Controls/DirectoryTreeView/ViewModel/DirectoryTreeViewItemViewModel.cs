@@ -205,7 +205,7 @@ namespace SqlServerRunnerNet.Controls.DirectoryTreeView.ViewModel
 					.OrderBy(dirInfo => dirInfo.Name, new StringWithNumericsComparer())
 					.Select(dirInfo => new FolderViewModel(new Folder(dirInfo.FullName), this)));
 
-			foreach (FolderViewModel model in Children)
+			foreach (var model in Children.OfType<FolderViewModel>())
 			{
 				var dirInfo = new DirectoryInfo(model.FullPath);
 

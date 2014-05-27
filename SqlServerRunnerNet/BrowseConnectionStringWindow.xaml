@@ -7,14 +7,15 @@
         xmlns:converters="clr-namespace:SqlServerRunnerNet.Infrastructure.Converters"
         xmlns:behaviors="clr-namespace:SqlServerRunnerNet.Infrastructure.Behaviors"
         x:Class="SqlServerRunnerNet.BrowseConnectionStringWindow"
-        Title="Connection String" Height="237" Width="360"
+        Title="Connection String" Width="360"
 		ShowInTaskbar="False" SizeToContent="Height" ResizeMode="NoResize"
 		Closing="Window_Closing">
 	<Window.Resources>
 		<converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" IsInverted="False" />
 		<converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverterInverted" IsInverted="True" />
+		<converters:BoolToGridLengthConverter x:Key="BoolToGridLengthConverter" />
 	</Window.Resources>
-	<Grid Margin="10">
+	<Grid Margin="10" x:Name="Grid">
 		<Grid.ColumnDefinitions>
 			<ColumnDefinition Width="Auto" />
 			<ColumnDefinition Width="20px"/>
@@ -26,8 +27,13 @@
 			<RowDefinition Height="Auto"/>
 			<RowDefinition Height="5"/>
 			<RowDefinition Height="Auto"/>
-			<RowDefinition Height="5"/>
-			<RowDefinition Height="Auto"/>
+			
+			<!-- autohiding rows when windows authentication is used -->
+			<RowDefinition Height="{Binding Model.IsSqlServerUser, ConverterParameter=5, Converter={StaticResource BoolToGridLengthConverter},
+				Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:BrowseConnectionStringWindow}}}"/>
+			<RowDefinition Height="{Binding Model.IsSqlServerUser, ConverterParameter=Auto, Converter={StaticResource BoolToGridLengthConverter},
+				Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:BrowseConnectionStringWindow}}}" />
+			
 			<RowDefinition Height="5"/>
 			<RowDefinition Height="Auto"/>
 			<RowDefinition Height="*"/>

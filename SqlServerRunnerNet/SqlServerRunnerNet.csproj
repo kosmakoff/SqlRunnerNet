@@ -142,6 +142,7 @@
     <Compile Include="Infrastructure\Commands\DelegateCommand.cs" />
     <Compile Include="Infrastructure\Commands\IAsyncCommand.cs" />
     <Compile Include="Infrastructure\Commands\IRaiseCanExecuteChanged.cs" />
+    <Compile Include="Infrastructure\Converters\BoolToGridLengthConverter.cs" />
     <Compile Include="Infrastructure\Converters\BoolToVisibilityConverter.cs" />
     <Compile Include="Infrastructure\Converters\EnumValueToDescriptionConverter.cs" />
     <Compile Include="Infrastructure\ExtensionMethods.cs" />

@@ -10,8 +10,20 @@ namespace SqlServerRunnerNet.ViewModel
 		public FolderViewModel()
 		{
 			Scripts = new TrulyObservableCollection<ScriptViewModel>();
-			Scripts.ItemChanged += (sender, args) => OnPropertyChanged("HasError");
-			Scripts.CollectionChanged += (sender, args) => OnPropertyChanged("HasError");
+			
+			Scripts.ItemChanged += (sender, args) =>
+			{
+				OnPropertyChanged("HasError");
+				OnPropertyChanged("SucceededScriptsCount");
+				OnPropertyChanged("FailedScriptsCount");
+			};
+
+			Scripts.CollectionChanged += (sender, args) =>
+			{
+				OnPropertyChanged("HasError");
+				OnPropertyChanged("SucceededScriptsCount");
+				OnPropertyChanged("FailedScriptsCount");
+			};
 		}
 
 		public override bool HasError
