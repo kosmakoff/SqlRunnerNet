@@ -153,7 +153,7 @@ namespace SqlServerRunnerNet.Utils
 		{
 			return new SqlServerInstance
 			{
-				ServerName = "localhost",
+				ServerName = "(local)",
 				InstanceName = instanceName.ToUpper(),
 				IsLocal = true
 			};
