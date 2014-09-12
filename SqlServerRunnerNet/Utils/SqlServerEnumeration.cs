@@ -113,7 +113,7 @@ namespace SqlServerRunnerNet.Utils
 				var connectionStringAsync = new SqlConnectionStringBuilder(connectionString) { AsynchronousProcessing = true }.ConnectionString;
 
 				using (var connection = new SqlConnection(connectionStringAsync))
-				using (var cmd = new SqlCommand("SELECT Name FROM master.sys.databases WHERE Name NOT IN ('master', 'tempdb', 'model', 'msdb') AND Name NOT LIKE 'ReportServer$%' ORDER BY Name", connection))
+				using (var cmd = new SqlCommand("SELECT Name FROM master.sys.databases WHERE Name NOT IN ('master', 'tempdb', 'model', 'msdb') AND Name NOT LIKE 'ReportServer$%' AND [state] = 0 ORDER BY Name", connection))
 				{
 					await connection.OpenAsync(ct);
 					var reader = await cmd.ExecuteReaderAsync(ct);
