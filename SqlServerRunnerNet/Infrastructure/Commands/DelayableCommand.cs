@@ -1,14 +1,12 @@
 ﻿using System;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using SqlServerRunnerNet.Annotations;
+using SqlServerRunnerNet.ViewModel;
 
 namespace SqlServerRunnerNet.Infrastructure.Commands
 {
-	public class DelayableCommand : INotifyPropertyChanged
+	public class DelayableCommand : NotifyPropertyChangedBase
 	{
 		private Timer _timer;
 		private CancellationTokenSource _cts;
@@ -95,18 +93,5 @@ namespace SqlServerRunnerNet.Infrastructure.Commands
 				_timer = null;
 			}
 		}
-
-		#region INotifyPropertyChanged interface implementation
-
-		public event PropertyChangedEventHandler PropertyChanged;
-
-		[NotifyPropertyChangedInvocator]
-		protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
-		{
-			PropertyChangedEventHandler handler = PropertyChanged;
-			if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
-		}
-
-		#endregion
 	}
 }

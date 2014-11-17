@@ -1,24 +1,13 @@
-﻿using System.ComponentModel;
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
+﻿using System.Diagnostics;
 using System.Windows;
 using System.Windows.Input;
-using SqlServerRunnerNet.Annotations;
 using SqlServerRunnerNet.Infrastructure.Commands;
 
 namespace SqlServerRunnerNet.ViewModel
 {
-	public abstract class FileSystemObjectViewModel : INotifyPropertyChanged
+	public abstract class FileSystemObjectViewModel : NotifyPropertyChangedBase
 	{
 		private string _path;
-		public event PropertyChangedEventHandler PropertyChanged;
-
-		[NotifyPropertyChangedInvocator]
-		protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
-		{
-			PropertyChangedEventHandler handler = PropertyChanged;
-			if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
-		}
 
 		protected FileSystemObjectViewModel()
 		{

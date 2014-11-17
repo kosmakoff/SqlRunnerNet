@@ -1,23 +1,10 @@
-﻿using System.ComponentModel;
-using System.Runtime.CompilerServices;
-using SqlServerRunnerNet.Annotations;
-
-namespace SqlServerRunnerNet.ViewModel
+﻿namespace SqlServerRunnerNet.ViewModel
 {
-	public class ScriptsFolderViewModel : INotifyPropertyChanged
+	public class ScriptsFolderViewModel : NotifyPropertyChangedBase
 	{
 		private bool _isChecked;
 		private string _filePath;
 		private bool _isSelected;
-
-		public event PropertyChangedEventHandler PropertyChanged;
-
-		[NotifyPropertyChangedInvocator]
-		protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
-		{
-			PropertyChangedEventHandler handler = PropertyChanged;
-			if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
-		}
 
 		public bool IsChecked
 		{

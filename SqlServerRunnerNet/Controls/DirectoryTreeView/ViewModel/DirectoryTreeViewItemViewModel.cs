@@ -1,16 +1,14 @@
 ﻿using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using SqlServerRunnerNet.Annotations;
 using SqlServerRunnerNet.Controls.DirectoryTreeView.Data;
 using SqlServerRunnerNet.Infrastructure;
 using SqlServerRunnerNet.Utils;
+using SqlServerRunnerNet.ViewModel;
 
 namespace SqlServerRunnerNet.Controls.DirectoryTreeView.ViewModel
 {
-	public class DirectoryTreeViewItemViewModel : INotifyPropertyChanged
+	public class DirectoryTreeViewItemViewModel : NotifyPropertyChangedBase
 	{
 		#region Data
 
@@ -226,19 +224,6 @@ namespace SqlServerRunnerNet.Controls.DirectoryTreeView.ViewModel
 		#endregion // Parent
 
 		#endregion // Presentation Members
-
-		#region INotifyPropertyChanged Members
-
-		public event PropertyChangedEventHandler PropertyChanged;
-
-		[NotifyPropertyChangedInvocator]
-		private void OnPropertyChanged([CallerMemberName] string propertyName = null)
-		{
-			PropertyChangedEventHandler handler = PropertyChanged;
-			if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
-		}
-
-		#endregion // INotifyPropertyChanged Members
 
 		public virtual string FullPath
 		{

@@ -152,6 +152,7 @@
     <Compile Include="Utils\Logging\LogWrapper.cs" />
     <Compile Include="Utils\Logging\MessageBoxLog.cs" />
     <Compile Include="Utils\SqlServerEnumeration.cs" />
+    <Compile Include="ViewModel\NotifyPropertyChangedBase.cs" />
     <Compile Include="ViewModel\ServerBrowserWindowViewModel.cs" />
     <Compile Include="ViewModel\FileSystemObjectViewModel.cs" />
     <Compile Include="ViewModel\FolderViewModel.cs" />

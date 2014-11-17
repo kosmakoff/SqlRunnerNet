@@ -16,21 +16,13 @@ using SqlServerRunnerNet.Infrastructure.Commands;
 
 namespace SqlServerRunnerNet.ViewModel
 {
-	public class SqlServerRunnerViewModel : INotifyPropertyChanged
+	public class SqlServerRunnerViewModel : NotifyPropertyChangedBase
 	{
 		private TrulyObservableCollection<ScriptsFolderViewModel> _scripts;
 		private string _connectionString;
 		private bool? _allScriptsChecked;
 		private ObservableCollection<FolderViewModel> _executedScripts;
 		private readonly Window _parent;
-		public event PropertyChangedEventHandler PropertyChanged;
-
-		[NotifyPropertyChangedInvocator]
-		protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
-		{
-			PropertyChangedEventHandler handler = PropertyChanged;
-			if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
-		}
 
 		private SqlServerRunnerViewModel()
 		{

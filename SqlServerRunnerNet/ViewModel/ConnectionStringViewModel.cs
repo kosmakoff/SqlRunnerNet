@@ -15,7 +15,7 @@ using SqlServerRunnerNet.Utils;
 
 namespace SqlServerRunnerNet.ViewModel
 {
-	public class ConnectionStringViewModel : INotifyPropertyChanged
+	public class ConnectionStringViewModel : NotifyPropertyChangedBase
 	{
 		private AuthenticationType _authenticationType;
 		private string _serverName;
@@ -28,17 +28,6 @@ namespace SqlServerRunnerNet.ViewModel
 		private readonly Window _parentWindow;
 
 		public DelayableCommand UpdateDatabaseNamesDelayableCommand { get; private set; }
-
-		#region INotifyPropertyChanged interface implementation
-		public event PropertyChangedEventHandler PropertyChanged;
-
-		[NotifyPropertyChangedInvocator]
-		protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
-		{
-			PropertyChangedEventHandler handler = PropertyChanged;
-			if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
-		}
-		#endregion
 
 		public ConnectionStringViewModel(Window parentWindow)
 		{
