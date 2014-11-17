@@ -1,15 +1,14 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
-using SqlServerRunnerNet.Annotations;
 using SqlServerRunnerNet.Business;
 using SqlServerRunnerNet.Infrastructure;
 using SqlServerRunnerNet.Infrastructure.Commands;
@@ -23,6 +22,14 @@ namespace SqlServerRunnerNet.ViewModel
 		private bool? _allScriptsChecked;
 		private ObservableCollection<FolderViewModel> _executedScripts;
 		private readonly Window _parent;
+		private int _currentScriptsCount;
+		private int _totalScriptsCount;
+		private bool _hasTotalScriptsCountBeenDetermined;
+
+		private ConcurrentQueue<ScriptViewModel> _scriptsQueue;
+		private ManualResetEvent _mreNoMoreScriptsExpected;
+
+		private CancellationTokenSource _cancellationTokenSource;
 
 		private SqlServerRunnerViewModel()
 		{
@@ -40,15 +47,18 @@ namespace SqlServerRunnerNet.ViewModel
 			MoveScriptDownCommand = new DelegateCommand(MoveScriptDownCommandExecute, MoveScriptDownCommandCanExecute);
 			RunSelectedScriptsCommand = new AwaitableDelegateCommand(RunSelectedScriptsCommandExecute, RunSelectedScriptsCommandCanExecute);
 
-			_progressFolder = new Progress<FolderViewModel>(ProgressFolder);
+			_currentScriptsCountProgress = new Progress<int>(ProgressCurrentScriptsCount);
+			_totalScriptsCountProgress = new Progress<int>(ProgressTotalScriptsCount);
 			_progressScript = new Progress<ScriptViewModel>(ProgressScript);
 		}
 
 		public SqlServerRunnerViewModel(Window parent)
-			:this()
+			: this()
 		{
 			_parent = parent;
 		}
+
+		#region Properties
 
 		public string ConnectionString
 		{
@@ -74,7 +84,7 @@ namespace SqlServerRunnerNet.ViewModel
 				else if (groups.Count > 1)
 					_allScriptsChecked = null;
 				else
-				_allScriptsChecked = groups[0].Key;
+					_allScriptsChecked = groups[0].Key;
 
 				return _allScriptsChecked;
 			}
@@ -86,7 +96,7 @@ namespace SqlServerRunnerNet.ViewModel
 
 				if (value.HasValue)
 				{
-					Scripts.InvokeWithoutNotify(script=>script.IsChecked = value.Value);
+					Scripts.InvokeWithoutNotify(script => script.IsChecked = value.Value);
 				}
 
 				OnPropertyChanged();
@@ -116,18 +126,64 @@ namespace SqlServerRunnerNet.ViewModel
 			}
 		}
 
+		public int CurrentScriptsCount
+		{
+			get { return _currentScriptsCount; }
+			set
+			{
+				if (value == _currentScriptsCount) return;
+				_currentScriptsCount = value;
+				OnPropertyChanged();
+			}
+		}
+
+		public int TotalScriptsCount
+		{
+			get { return _totalScriptsCount; }
+			set
+			{
+				if (value == _totalScriptsCount) return;
+				_totalScriptsCount = value;
+				OnPropertyChanged();
+			}
+		}
+
+		public bool HasTotalScriptsCountBeenDetermined
+		{
+			get { return _hasTotalScriptsCountBeenDetermined; }
+			set
+			{
+				if (value.Equals(_hasTotalScriptsCountBeenDetermined)) return;
+				_hasTotalScriptsCountBeenDetermined = value;
+				OnPropertyChanged();
+			}
+		}
+
+		public bool ExecutionInProgress
+		{
+			get { return _executionInProgress; }
+			set
+			{
+				if (value.Equals(_executionInProgress)) return;
+				_executionInProgress = value;
+				OnPropertyChanged();
+			}
+		}
+
+		#endregion
+
 		#region Commands
 
 		public ICommand BrowseConnectionStringCommand { get; private set; }
 
 		public ICommand AddScriptCommand { get; private set; }
-		
+
 		public ICommand RemoveScriptCommand { get; private set; }
 
 		public ICommand ClearScriptsCommand { get; private set; }
 
 		public ICommand MoveScriptUpCommand { get; private set; }
-		
+
 		public ICommand MoveScriptDownCommand { get; private set; }
 
 		public ICommand RunSelectedScriptsCommand { get; private set; }
@@ -136,18 +192,30 @@ namespace SqlServerRunnerNet.ViewModel
 
 		#region Progress Reporting
 
-		private readonly IProgress<FolderViewModel> _progressFolder;
+		private readonly IProgress<int> _currentScriptsCountProgress;
+
+		private readonly IProgress<int> _totalScriptsCountProgress;
 
 		private readonly IProgress<ScriptViewModel> _progressScript;
+		private bool _executionInProgress;
 
-		private void ProgressFolder(FolderViewModel model)
+		private void ProgressCurrentScriptsCount(int progress)
 		{
-			ExecutedScripts.Add(model);
+			CurrentScriptsCount += progress;
+		}
+
+		private void ProgressTotalScriptsCount(int progress)
+		{
+			TotalScriptsCount += progress;
 		}
 
 		private void ProgressScript(ScriptViewModel model)
 		{
 			var folderViewModel = model.Parent;
+
+			if (!ExecutedScripts.Contains(folderViewModel))
+				ExecutedScripts.Add(folderViewModel);
+
 			folderViewModel.Scripts.Add(model);
 		}
 
@@ -157,7 +225,7 @@ namespace SqlServerRunnerNet.ViewModel
 
 		private void BrowseConnectionStringExecute()
 		{
-			var browseWindow = new BrowseConnectionStringWindow(_parent) {ConnectionString = ConnectionString};
+			var browseWindow = new BrowseConnectionStringWindow(_parent) { ConnectionString = ConnectionString };
 			if (browseWindow.ShowDialog() == true)
 				ConnectionString = browseWindow.ConnectionString;
 		}
@@ -181,7 +249,7 @@ namespace SqlServerRunnerNet.ViewModel
 
 				foreach (var directoryInfo in newDirectories)
 				{
-					Scripts.Add(new ScriptsFolderViewModel {FilePath = directoryInfo.FullName.TrimEnd('\\'), IsChecked = true});
+					Scripts.Add(new ScriptsFolderViewModel { FilePath = directoryInfo.FullName.TrimEnd('\\'), IsChecked = true });
 				}
 
 				var last = newDirectories.Last();
@@ -230,13 +298,13 @@ namespace SqlServerRunnerNet.ViewModel
 		private bool MoveScriptUpCommandCanExecute()
 		{
 			return Scripts.Count(script => script.IsSelected) == 1 &&
-			       Scripts.IndexOf(Scripts.Single(script => script.IsSelected)) > 0;
+				   Scripts.IndexOf(Scripts.Single(script => script.IsSelected)) > 0;
 		}
 
 		private bool MoveScriptDownCommandCanExecute()
 		{
 			return Scripts.Count(script => script.IsSelected) == 1 &&
-			       Scripts.IndexOf(Scripts.Single(script => script.IsSelected)) < Scripts.Count - 1;
+				   Scripts.IndexOf(Scripts.Single(script => script.IsSelected)) < Scripts.Count - 1;
 		}
 
 		private async Task RunSelectedScriptsCommandExecute()
@@ -248,6 +316,7 @@ namespace SqlServerRunnerNet.ViewModel
 				if (string.IsNullOrWhiteSpace(ConnectionString))
 					throw new Exception();
 
+				// ReSharper disable once ObjectCreationAsStatement
 				new SqlConnectionStringBuilder { ConnectionString = ConnectionString };
 			}
 			catch
@@ -277,41 +346,89 @@ namespace SqlServerRunnerNet.ViewModel
 
 			await Task.Factory.StartNew(() =>
 			{
+				_scriptsQueue = new ConcurrentQueue<ScriptViewModel>();
+				_mreNoMoreScriptsExpected = new ManualResetEvent(false);
 
-				// main part of the APP
+				CurrentScriptsCount = 0;
+				TotalScriptsCount = 0;
+				HasTotalScriptsCountBeenDetermined = false;
+				ExecutionInProgress = true;
 
-				foreach (var scriptFolder in Scripts.Where(script=>script.IsChecked))
+				_cancellationTokenSource = new CancellationTokenSource();
+				var token = _cancellationTokenSource.Token;
+
+				var getScriptsTask = new Task(param =>
 				{
-					var path = scriptFolder.FilePath;
-					var di = new DirectoryInfo(path);
-					if (!di.Exists)
-						continue;
+					var cancellationToken = (CancellationToken)param;
 
-					var sqlFiles = di.EnumerateFiles("*.sql").ToList();
-
-					if (!sqlFiles.Any())
-						continue;
-
-					var executedFolderViewModel = new FolderViewModel {Path = path};
-
-					_progressFolder.Report(executedFolderViewModel);
-					
-					foreach (var fileInfo in sqlFiles)
+					foreach (var scriptFolder in Scripts.Where(script => script.IsChecked))
 					{
-						var scriptPath = fileInfo.FullName;
+						cancellationToken.ThrowIfCancellationRequested();
+						var path = scriptFolder.FilePath;
+						var di = new DirectoryInfo(path);
+						if (!di.Exists)
+							continue;
 
-						var executedScriptModel = new ScriptViewModel {Parent = executedFolderViewModel, Path = scriptPath};
+						var sqlFiles = di.EnumerateFiles("*.sql").ToList();
 
-						string errorMessage;
+						if (!sqlFiles.Any())
+							continue;
 
-						if (!SqlScriptRunner.RunSqlScriptOnConnection(ConnectionString, scriptPath, out errorMessage))
+						_totalScriptsCountProgress.Report(sqlFiles.Count);
+
+						var folderViewModel = new FolderViewModel { Path = path };
+
+						foreach (var fileInfo in sqlFiles)
 						{
-							executedScriptModel.ErrorMessage = errorMessage;
+							cancellationToken.ThrowIfCancellationRequested();
+							var scriptPath = fileInfo.FullName;
+							var scriptViewModel = new ScriptViewModel { Parent = folderViewModel, Path = scriptPath };
+							_scriptsQueue.Enqueue(scriptViewModel);
 						}
-
-						_progressScript.Report(executedScriptModel);
 					}
+				}, token, token);
+
+				var finishedProcessingTask = getScriptsTask.ContinueWith(continuation =>
+				{
+					HasTotalScriptsCountBeenDetermined = true;
+					_mreNoMoreScriptsExpected.Set();
+				}, token);
+
+				var processScriptsTask = Task.Factory.StartNew(param =>
+				{
+					var cancellationToken = (CancellationToken)param;
+
+					while (true)
+					{
+						cancellationToken.ThrowIfCancellationRequested();
+
+						ScriptViewModel viewModel;
+						if (_scriptsQueue.TryDequeue(out viewModel))
+						{
+							SqlScriptRunner.RunSqlScriptOnConnection(ConnectionString, viewModel);
+							_currentScriptsCountProgress.Report(1);
+							_progressScript.Report(viewModel);
+						}
+						else
+						{
+							if (_mreNoMoreScriptsExpected.WaitOne(TimeSpan.Zero))
+								break;
+						}
+					}
+				}, token, token);
+
+				getScriptsTask.Start();
+
+				try
+				{
+					Task.WaitAll(finishedProcessingTask, processScriptsTask);
 				}
+				catch (AggregateException aex)
+				{
+					aex.Handle(ex => ex is TaskCanceledException);
+				}
+
+				ExecutionInProgress = false;
 			});
 		}
 

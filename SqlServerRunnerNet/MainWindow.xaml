@@ -5,6 +5,7 @@
 	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 	xmlns:commands="clr-namespace:SqlServerRunnerNet.Commands"
 	xmlns:viewModel="clr-namespace:SqlServerRunnerNet.ViewModel"
+	xmlns:converters="clr-namespace:SqlServerRunnerNet.Infrastructure.Converters"
 	mc:Ignorable="d" x:Class="SqlServerRunnerNet.MainWindow"
 	Title="SQL Runner .NET" Height="480" Width="640" Icon="run.ico"
 	Loaded="Window_OnLoaded" Closing="Window_Closing" SnapsToDevicePixels="True"
@@ -14,12 +15,32 @@
 			<ResourceDictionary.MergedDictionaries>
 				<ResourceDictionary Source="MainResourcesDictionary.xaml" />
 			</ResourceDictionary.MergedDictionaries>
+			<converters:BoolToVisibilityConverter x:Key="VisibilityConverter" />
+			<converters:InvertBooleanConverter x:Key="InvertBooleanConverter" />
+			<converters:TaskbarItemProgressStateConverter x:Key="ProgressStateConverter" />
+			<converters:FractionConverter x:Key="FractionConverter" />
 		</ResourceDictionary>
 	</Window.Resources>
 	<Window.CommandBindings>
 		<CommandBinding Command="commands:ApplicationCommands.ExitCommand" Executed="ExitCommand_Executed" />
 		<CommandBinding Command="commands:ScriptsCommands.ClearOutputCommand" Executed="ClearOutputCommand_Executed" CanExecute="ClearOutputCommand_CanExecute" />
 	</Window.CommandBindings>
+	<Window.TaskbarItemInfo>
+		<TaskbarItemInfo>
+			<TaskbarItemInfo.ProgressValue>
+				<MultiBinding Converter="{StaticResource FractionConverter}">
+					<Binding Path="CurrentScriptsCount" />
+					<Binding Path="TotalScriptsCount" />
+				</MultiBinding>
+			</TaskbarItemInfo.ProgressValue>
+			<TaskbarItemInfo.ProgressState>
+				<MultiBinding Converter="{StaticResource ProgressStateConverter}" Mode="OneWay">
+					<Binding Path="ExecutionInProgress" />
+					<Binding Path="HasTotalScriptsCountBeenDetermined" />
+				</MultiBinding>
+			</TaskbarItemInfo.ProgressState>
+		</TaskbarItemInfo>
+	</Window.TaskbarItemInfo>
 	<Grid>
 		<Grid.RowDefinitions>
 			<RowDefinition Height="Auto" />
@@ -119,7 +140,9 @@
 						<ColumnDefinition Width="Auto"/>
 						<ColumnDefinition Width="3*"/>
 					</Grid.ColumnDefinitions>
-					<ProgressBar Grid.Row="0" Grid.ColumnSpan="3" Height="5" Margin="0,2" IsIndeterminate="True" x:Name="ExecutionProgressBar" Visibility="Collapsed" />
+					<ProgressBar Grid.Row="0" Grid.ColumnSpan="3" Height="5" Margin="0,2" IsIndeterminate="{Binding HasTotalScriptsCountBeenDetermined, Converter={StaticResource InvertBooleanConverter}}"
+								 Visibility="{Binding ExecutionInProgress, Converter={StaticResource VisibilityConverter}}"
+								 Minimum="0" Maximum="{Binding TotalScriptsCount}" Value="{Binding CurrentScriptsCount}"/>
 					<TreeView Grid.Row="1" Grid.Column="0" x:Name="ExecutedScriptsTreeView" ItemsSource="{Binding}"
 							  DataContext="{Binding ExecutedScripts}" >
 						<TreeView.Resources>

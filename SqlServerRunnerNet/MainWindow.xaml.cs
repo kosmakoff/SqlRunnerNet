@@ -1,7 +1,6 @@
 ﻿using System.Linq;
 using System.Windows;
 using System.Windows.Input;
-using SqlServerRunnerNet.Infrastructure.Commands;
 using SqlServerRunnerNet.Properties;
 using SqlServerRunnerNet.ViewModel;
 
@@ -20,16 +19,6 @@ namespace SqlServerRunnerNet
 
 			Model = new SqlServerRunnerViewModel(this);
 			DataContext = Model;
-
-			((AwaitableDelegateCommand) Model.RunSelectedScriptsCommand).Executing += (sender, args) =>
-			{
-				ExecutionProgressBar.Visibility = Visibility.Visible;
-			};
-
-			((AwaitableDelegateCommand) Model.RunSelectedScriptsCommand).Executed += (sender) =>
-			{
-				ExecutionProgressBar.Visibility = Visibility.Collapsed;
-			};
 		}
 
 		#region Commands
