@@ -40,6 +40,7 @@ namespace SqlServerRunnerNet.ViewModel
 
 			ExecutedScripts = new ObservableCollection<FolderViewModel>();
 
+			BrowseConnectionStringCommand = new DelegateCommand(BrowseConnectionStringExecute);
 			AddScriptCommand = new DelegateCommand(AddScriptCommandExecute);
 			RemoveScriptCommand = new DelegateCommand(RemoveScriptCommandExecute, RemoveScriptCommandCanExecute);
 			ClearScriptsCommand = new DelegateCommand(ClearScriptsCommandExecute, ClearScriptsCommandCanExecute);
@@ -125,6 +126,8 @@ namespace SqlServerRunnerNet.ViewModel
 
 		#region Commands
 
+		public ICommand BrowseConnectionStringCommand { get; private set; }
+
 		public ICommand AddScriptCommand { get; private set; }
 		
 		public ICommand RemoveScriptCommand { get; private set; }
@@ -159,6 +162,13 @@ namespace SqlServerRunnerNet.ViewModel
 		#endregion
 
 		#region Commands Implementations
+
+		private void BrowseConnectionStringExecute()
+		{
+			var browseWindow = new BrowseConnectionStringWindow(_parent) {ConnectionString = ConnectionString};
+			if (browseWindow.ShowDialog() == true)
+				ConnectionString = browseWindow.ConnectionString;
+		}
 
 		private void AddScriptCommandExecute()
 		{

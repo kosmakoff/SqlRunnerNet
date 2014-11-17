@@ -32,13 +32,6 @@ namespace SqlServerRunnerNet
 			};
 		}
 
-		private void BrowseConnectionButton_OnClick(object sender, RoutedEventArgs e)
-		{
-			var browseWindow = new BrowseConnectionStringWindow(this) { ConnectionString = Model.ConnectionString };
-			if (browseWindow.ShowDialog() == true)
-				Model.ConnectionString = browseWindow.ConnectionString;
-		}
-
 		#region Commands
 
 		private void ExitCommand_Executed(object sender, ExecutedRoutedEventArgs e)

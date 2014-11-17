@@ -1,15 +1,16 @@
-﻿<Window
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:infrastructure="clr-namespace:SqlServerRunnerNet.Infrastructure"
-        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
-        xmlns:local="clr-namespace:SqlServerRunnerNet"
-        xmlns:converters="clr-namespace:SqlServerRunnerNet.Infrastructure.Converters"
-        xmlns:behaviors="clr-namespace:SqlServerRunnerNet.Infrastructure.Behaviors"
-        x:Class="SqlServerRunnerNet.BrowseConnectionStringWindow"
-        Title="Connection String" Width="360"
-		ShowInTaskbar="False" SizeToContent="Height" ResizeMode="NoResize"
-		Closing="Window_Closing">
+﻿<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+		xmlns:infrastructure="clr-namespace:SqlServerRunnerNet.Infrastructure"
+		xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+		xmlns:converters="clr-namespace:SqlServerRunnerNet.Infrastructure.Converters"
+		xmlns:behaviors="clr-namespace:SqlServerRunnerNet.Infrastructure.Behaviors"
+		x:Class="SqlServerRunnerNet.BrowseConnectionStringWindow"
+		Title="Connection String" Width="360" ShowInTaskbar="False"
+		SizeToContent="Height" ResizeMode="NoResize" Closing="Window_Closing"
+		xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+		xmlns:d="http://schemas.microsoft.com/expression/blend/2008" mc:Ignorable="d"
+		xmlns:viewModel="clr-namespace:SqlServerRunnerNet.ViewModel"
+		d:DataContext="{d:DesignInstance viewModel:ConnectionStringViewModel}">
 	<Window.Resources>
 		<converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" IsInverted="False" />
 		<converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverterInverted" IsInverted="True" />
@@ -29,10 +30,8 @@
 			<RowDefinition Height="Auto"/>
 			
 			<!-- autohiding rows when windows authentication is used -->
-			<RowDefinition Height="{Binding Model.IsSqlServerUser, ConverterParameter=5, Converter={StaticResource BoolToGridLengthConverter},
-				Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:BrowseConnectionStringWindow}}}"/>
-			<RowDefinition Height="{Binding Model.IsSqlServerUser, ConverterParameter=Auto, Converter={StaticResource BoolToGridLengthConverter},
-				Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:BrowseConnectionStringWindow}}}" />
+			<RowDefinition Height="{Binding IsSqlServerUser, ConverterParameter=5, Converter={StaticResource BoolToGridLengthConverter}}"/>
+			<RowDefinition Height="{Binding IsSqlServerUser, ConverterParameter=Auto, Converter={StaticResource BoolToGridLengthConverter}}" />
 			
 			<RowDefinition Height="5"/>
 			<RowDefinition Height="Auto"/>
@@ -40,30 +39,26 @@
 		</Grid.RowDefinitions>
 		<Label Grid.Row="0" Grid.Column="0" Content="Server name:" x:Name="LblServerName" />
 		<Label Grid.Row="2" Grid.Column="0" Content="Authentication:"/>
-		<Label Grid.Row="4" Grid.Column="0" Content="User name:" Margin="10,0,0,0"
-			   IsEnabled="{Binding Model.IsSqlServerUser, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:BrowseConnectionStringWindow}}}"/>
-		<Label Grid.Row="6" Grid.Column="0" Content="Password:" Margin="10,0,0,0"
-			   IsEnabled="{Binding Model.IsSqlServerUser, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:BrowseConnectionStringWindow}}}"/>
+		<Label Grid.Row="4" Grid.Column="0" Content="User name:" Margin="10,0,0,0" IsEnabled="{Binding IsSqlServerUser}"/>
+		<Label Grid.Row="6" Grid.Column="0" Content="Password:" Margin="10,0,0,0" IsEnabled="{Binding IsSqlServerUser}"/>
 		<Label Grid.Row="8" Grid.Column="0" Content="Database" />
 		<Grid Grid.Row="0" Grid.Column="2">
 			<Grid.ColumnDefinitions>
 				<ColumnDefinition Width="*" />
 				<ColumnDefinition Width="Auto" />
 			</Grid.ColumnDefinitions>
-			<ComboBox Grid.Column="0" IsEditable="True"
-					  Text="{Binding Model.NewServerName, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:BrowseConnectionStringWindow}}, UpdateSourceTrigger=LostFocus}"
-					  ItemsSource="{Binding Model.RecentServerNames, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:BrowseConnectionStringWindow}}}"
-					  SelectedItem="{Binding Model.ServerName ,RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:BrowseConnectionStringWindow}}}">
+			<ComboBox Grid.Column="0" IsEditable="True" Text="{Binding NewServerName, UpdateSourceTrigger=LostFocus}"
+					  ItemsSource="{Binding RecentServerNames}" SelectedItem="{Binding ServerName}">
 				<i:Interaction.Triggers>
 					<i:EventTrigger EventName="SelectionChanged">
-						<i:InvokeCommandAction Command="{Binding Model.UpdateDatabaseNamesDelayableCommand.ReStartCommand ,RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:BrowseConnectionStringWindow}}}" />
+						<i:InvokeCommandAction Command="{Binding UpdateDatabaseNamesDelayableCommand.ReStartCommand}" />
 					</i:EventTrigger>
 				</i:Interaction.Triggers>
 			</ComboBox>
 			<Button Grid.Column="1" Margin="5,0,0,0" Padding="10,0" Click="BrowseServersButton_OnClick">...</Button>
 		</Grid>
 		<ComboBox Grid.Row="2" Grid.Column="2" ItemsSource="{infrastructure:EnumValues {x:Type infrastructure:AuthenticationType}}"
-				  SelectedItem="{Binding Model.AuthenticationType, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:BrowseConnectionStringWindow}}}">
+				  SelectedItem="{Binding AuthenticationType}">
 			<ComboBox.Resources>
 				<converters:EnumValueToDescriptionConverter x:Key="DescriptionConverter" />
 			</ComboBox.Resources>
@@ -74,37 +69,37 @@
 			</ComboBox.ItemTemplate>
 			<i:Interaction.Triggers>
 				<i:EventTrigger EventName="SelectionChanged">
-					<i:InvokeCommandAction Command="{Binding Model.UpdateDatabaseNamesDelayableCommand.ReStartCommand ,RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:BrowseConnectionStringWindow}}}" />
+					<i:InvokeCommandAction Command="{Binding UpdateDatabaseNamesDelayableCommand.ReStartCommand}" />
 				</i:EventTrigger>
 			</i:Interaction.Triggers>
 		</ComboBox>
 		<TextBox Grid.Row="4" Grid.Column="2" VerticalContentAlignment="Center"
-				 IsEnabled="{Binding Model.IsSqlServerUser, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:BrowseConnectionStringWindow}}}">
+				 IsEnabled="{Binding IsSqlServerUser}">
 			<TextBox.Style>
 				<Style TargetType="{x:Type TextBox}">
 					<Style.Setters>
-						<Setter Property="Text" Value="{Binding Model.LocalUsername, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:BrowseConnectionStringWindow}}, Mode=OneTime}" />
+						<Setter Property="Text" Value="{Binding LocalUsername, Mode=OneTime}" />
 					</Style.Setters>
 					<Style.Triggers>
-						<DataTrigger Binding="{Binding Model.IsSqlServerUser, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:BrowseConnectionStringWindow}}}" Value="True">
-							<Setter Property="Text" Value="{Binding Model.SqlServerUsername, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:BrowseConnectionStringWindow}}}" />
+						<DataTrigger Binding="{Binding IsSqlServerUser}" Value="True">
+							<Setter Property="Text" Value="{Binding SqlServerUsername}" />
 						</DataTrigger>
 					</Style.Triggers>
 				</Style>
 			</TextBox.Style>
 			<i:Interaction.Triggers>
 				<i:EventTrigger EventName="TextChanged">
-					<i:InvokeCommandAction Command="{Binding Model.UpdateDatabaseNamesDelayableCommand.ReStartCommand ,RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:BrowseConnectionStringWindow}}}" />
+					<i:InvokeCommandAction Command="{Binding UpdateDatabaseNamesDelayableCommand.ReStartCommand}" />
 				</i:EventTrigger>
 			</i:Interaction.Triggers>
 		</TextBox>
 		<PasswordBox Grid.Row="6" Grid.Column="2" VerticalContentAlignment="Center" x:Name="PasswordBox">
 			<i:Interaction.Behaviors>
-				<behaviors:PasswordBehavior Password="{Binding Model.Password, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:BrowseConnectionStringWindow}}, Mode=TwoWay}" />
+				<behaviors:PasswordBehavior Password="{Binding Password, Mode=TwoWay}" />
 			</i:Interaction.Behaviors>
 			<i:Interaction.Triggers>
 				<i:EventTrigger EventName="PasswordChanged">
-					<i:InvokeCommandAction Command="{Binding Model.UpdateDatabaseNamesDelayableCommand.ReStartCommand ,RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:BrowseConnectionStringWindow}}}" />
+					<i:InvokeCommandAction Command="{Binding UpdateDatabaseNamesDelayableCommand.ReStartCommand}" />
 				</i:EventTrigger>
 			</i:Interaction.Triggers>
 			<PasswordBox.Style>
@@ -113,7 +108,7 @@
 						<Setter Property="Visibility" Value="Collapsed" />
 					</Style.Setters>
 					<Style.Triggers>
-						<DataTrigger Binding="{Binding Model.IsSqlServerUser, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:BrowseConnectionStringWindow}}}" Value="True">
+						<DataTrigger Binding="{Binding IsSqlServerUser}" Value="True">
 							<Setter Property="Visibility" Value="Visible" />
 						</DataTrigger>
 					</Style.Triggers>
@@ -127,7 +122,7 @@
 						<Setter Property="Visibility" Value="Visible" />
 					</Style.Setters>
 					<Style.Triggers>
-						<DataTrigger Binding="{Binding Model.IsSqlServerUser, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:BrowseConnectionStringWindow}}}" Value="True">
+						<DataTrigger Binding="{Binding IsSqlServerUser}" Value="True">
 							<Setter Property="Visibility" Value="Collapsed" />
 						</DataTrigger>
 					</Style.Triggers>
@@ -135,12 +130,10 @@
 			</TextBox.Style>
 		</TextBox>
 		<ComboBox Grid.Row="8" Grid.Column="2" IsEditable="True"
-				  ItemsSource="{Binding Model.DatabaseNamesList, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:BrowseConnectionStringWindow}}}"
-				  SelectedItem="{Binding Model.DatabaseName, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:BrowseConnectionStringWindow}}}"
-				  Text="{Binding Model.NewDatabaseName, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:BrowseConnectionStringWindow}}, UpdateSourceTrigger=LostFocus}"
-				  Visibility="{Binding Model.UpdateDatabaseNamesDelayableCommand.IsBusy, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:BrowseConnectionStringWindow}}, Converter={StaticResource BoolToVisibilityConverterInverted}}"/>
+				  ItemsSource="{Binding DatabaseNamesList}" SelectedItem="{Binding DatabaseName}" Text="{Binding NewDatabaseName, UpdateSourceTrigger=LostFocus}"
+				  Visibility="{Binding UpdateDatabaseNamesDelayableCommand.IsBusy, Converter={StaticResource BoolToVisibilityConverterInverted}}"/>
 		<ProgressBar IsIndeterminate="True" Grid.Row="8" Grid.Column="2"
-					 Visibility="{Binding Model.UpdateDatabaseNamesDelayableCommand.IsBusy, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:BrowseConnectionStringWindow}}, Converter={StaticResource BoolToVisibilityConverter}}" />
+					 Visibility="{Binding UpdateDatabaseNamesDelayableCommand.IsBusy, Converter={StaticResource BoolToVisibilityConverter}}" />
 		<StackPanel Grid.Row="9" Grid.Column="0" Grid.ColumnSpan="3" Orientation="Horizontal" Margin="0,5,0,0" HorizontalAlignment="Center" VerticalAlignment="Bottom">
 			<Button IsDefault="True" Padding="15,3" Content="OK" Click="OkButton_OnClick"/>
 			<Button IsCancel="True" Padding="15,3" Content="Cancel"/>

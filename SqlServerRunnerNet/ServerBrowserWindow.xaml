@@ -1,13 +1,12 @@
 ﻿<Window x:Class="SqlServerRunnerNet.ServerBrowserWindow"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+		xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 		xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 		xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 		xmlns:viewModel="clr-namespace:SqlServerRunnerNet.ViewModel"
-		xmlns:sqlServerRunnerNet="clr-namespace:SqlServerRunnerNet"
 		xmlns:utils="clr-namespace:SqlServerRunnerNet.Utils"
-		mc:Ignorable="d"
-        Title="Servers" Height="400" Width="350" ShowInTaskbar="False">
+		mc:Ignorable="d" Title="Servers" Height="400" Width="350" ShowInTaskbar="False"
+		d:DataContext="{d:DesignInstance viewModel:ServerBrowserWindowViewModel}">
 	<Window.Resources>
 		<CollectionViewSource x:Key="LocalInstancesCollection" Source="{Binding LocalInstancesCollection}" />
 		<CollectionViewSource x:Key="RemoteInstancesCollection" Source="{Binding RemoteInstancesCollection}" />
@@ -27,7 +26,7 @@
 							<Style TargetType="ListBoxItem">
 								<Setter Property="Visibility" Value="Collapsed" />
 								<Style.Triggers>
-									<DataTrigger Binding="{Binding Model.IsLoading, RelativeSource={RelativeSource FindAncestor, AncestorType=sqlServerRunnerNet:ServerBrowserWindow}}" Value="True">
+									<DataTrigger Binding="{Binding IsLoading}" Value="True">
 										<Setter Property="Visibility" Value="Visible" />
 									</DataTrigger>
 								</Style.Triggers>

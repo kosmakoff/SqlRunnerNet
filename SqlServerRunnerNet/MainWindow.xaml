@@ -6,11 +6,11 @@
 	xmlns:local="clr-namespace:SqlServerRunnerNet"
 	xmlns:commands="clr-namespace:SqlServerRunnerNet.Commands"
 	xmlns:viewModel="clr-namespace:SqlServerRunnerNet.ViewModel"
-	mc:Ignorable="d"
-	x:Class="SqlServerRunnerNet.MainWindow"
+	xmlns:common="clr-namespace:SqlServerRunnerNet.Controls.Common"
+	mc:Ignorable="d" x:Class="SqlServerRunnerNet.MainWindow"
 	Title="SQL Runner .NET" Height="480" Width="640" Icon="run.ico"
-	Loaded="Window_OnLoaded" Closing="Window_Closing"
-	SnapsToDevicePixels="False">
+	Loaded="Window_OnLoaded" Closing="Window_Closing" SnapsToDevicePixels="True"
+	d:DataContext="{d:DesignInstance viewModel:SqlServerRunnerViewModel}">
 	<Window.Resources>
 		<ResourceDictionary>
 			<ResourceDictionary.MergedDictionaries>
@@ -49,8 +49,8 @@
 						<ColumnDefinition Width="Auto" />
 					</Grid.ColumnDefinitions>
 					<Label Grid.Column="0" VerticalContentAlignment="Center" Content="Connection String:"/>
-					<TextBox Grid.Column="1" Text="{Binding Model.ConnectionString, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" />
-					<Button Grid.Column="2" Margin="5,0,0,0" Padding="10,0" x:Name="BrowseConnectionButton" Click="BrowseConnectionButton_OnClick" Content="..."/>
+					<TextBox Grid.Column="1" Text="{Binding ConnectionString}" />
+					<Button Grid.Column="2" Margin="5,0,0,0" Padding="10,0" Command="{Binding BrowseConnectionStringCommand}" Content="..."/>
 				</Grid>
 			</GroupBox>
 			<GroupBox Header="Script files" Grid.Row="1">
@@ -65,20 +65,19 @@
 							<RowDefinition Height="*" />
 						</Grid.RowDefinitions>
 						<CheckBox Grid.Row="0" Content="Check/Uncheck all folders in the list" Margin="3"
-								  IsChecked="{Binding Model.AllScriptsChecked, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" IsThreeState="False">
+								  IsChecked="{Binding AllScriptsChecked}" IsThreeState="False">
 							<CheckBox.Style>
 								<Style>
 									<Style.Triggers>
-										<DataTrigger Binding="{Binding Model.Scripts.Count, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" Value="0">
+										<DataTrigger Binding="{Binding Scripts.Count}" Value="0">
 											<Setter Property="CheckBox.IsEnabled" Value="False" />
 										</DataTrigger>
 									</Style.Triggers>
 								</Style>
 							</CheckBox.Style>
 						</CheckBox>
-						<ListBox Grid.Row="1"
-									DataContext="{Binding Model.Scripts, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}"
-									ItemsSource="{Binding}" x:Name="ScriptsList" ScrollViewer.CanContentScroll="False" SelectionMode="Extended" >
+						<ListBox Grid.Row="1" DataContext="{Binding Scripts}" ItemsSource="{Binding}"
+								 x:Name="ScriptsList" ScrollViewer.CanContentScroll="False" SelectionMode="Extended" >
 							<ListBox.ItemContainerStyle>
 								<Style TargetType="{x:Type ListBoxItem}">
 									<Setter Property="IsSelected" Value="{Binding IsSelected}" />
@@ -95,20 +94,18 @@
 						</ListBox>
 					</Grid>
 					<StackPanel Grid.Column="1" VerticalAlignment="Top" x:Name="ButtonsStackPanel" Margin="5,0,0,0">
-						<Button Command="{Binding Model.AddScriptCommand, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" Content="Add" />
-						<Button Command="{Binding Model.RemoveScriptCommand, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" Content="Remove"/>
-						<Button Command="{Binding Model.ClearScriptsCommand, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" Content="Clear"/>
+						<Button Command="{Binding AddScriptCommand}" Content="Add" />
+						<Button Command="{Binding RemoveScriptCommand}" Content="Remove"/>
+						<Button Command="{Binding ClearScriptsCommand}" Content="Clear"/>
 						<Grid>
 							<Grid.ColumnDefinitions>
 								<ColumnDefinition />
 								<ColumnDefinition />
 							</Grid.ColumnDefinitions>
-							<Button Grid.Column="0" Content="Up" Margin="3,1.5,1.5,1.5"
-									Command="{Binding Model.MoveScriptUpCommand, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}"/>
-							<Button Grid.Column="1" Content="Down" Margin="1.5,1.5,3,1.5"
-									Command="{Binding Model.MoveScriptDownCommand, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}"/>
+							<Button Grid.Column="0" Content="Up" Margin="3,1.5,1.5,1.5" Command="{Binding MoveScriptUpCommand}"/>
+							<Button Grid.Column="1" Content="Down" Margin="1.5,1.5,3,1.5" Command="{Binding MoveScriptDownCommand}"/>
 						</Grid>
-						<Button Command="{Binding Model.RunSelectedScriptsCommand, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" Content="Run Selected" />
+						<Button Command="{Binding RunSelectedScriptsCommand}" Content="Run Selected" />
 					</StackPanel>
 				</Grid>
 			</GroupBox>
@@ -126,7 +123,7 @@
 					</Grid.ColumnDefinitions>
 					<ProgressBar Grid.Row="0" Grid.ColumnSpan="3" Height="5" Margin="0,2" IsIndeterminate="True" x:Name="ExecutionProgressBar" Visibility="Collapsed" />
 					<TreeView Grid.Row="1" Grid.Column="0" x:Name="ExecutedScriptsTreeView" ItemsSource="{Binding}"
-							  DataContext="{Binding Model.ExecutedScripts, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" >
+							  DataContext="{Binding ExecutedScripts}" >
 						<TreeView.Resources>
 							<HierarchicalDataTemplate DataType="{x:Type viewModel:FolderViewModel}" ItemsSource="{Binding Scripts}">
 								<StackPanel Orientation="Horizontal">
