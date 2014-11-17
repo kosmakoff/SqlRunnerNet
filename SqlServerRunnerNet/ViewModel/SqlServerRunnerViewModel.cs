@@ -46,6 +46,9 @@ namespace SqlServerRunnerNet.ViewModel
 			MoveScriptUpCommand = new DelegateCommand(MoveScriptUpCommandExecute, MoveScriptUpCommandCanExecute);
 			MoveScriptDownCommand = new DelegateCommand(MoveScriptDownCommandExecute, MoveScriptDownCommandCanExecute);
 			RunSelectedScriptsCommand = new AwaitableDelegateCommand(RunSelectedScriptsCommandExecute, RunSelectedScriptsCommandCanExecute);
+
+			_progressFolder = new Progress<FolderViewModel>(ProgressFolder);
+			_progressScript = new Progress<ScriptViewModel>(ProgressScript);
 		}
 
 		public SqlServerRunnerViewModel(Window parent)
@@ -133,6 +136,25 @@ namespace SqlServerRunnerNet.ViewModel
 		public ICommand MoveScriptDownCommand { get; private set; }
 
 		public ICommand RunSelectedScriptsCommand { get; private set; }
+
+		#endregion
+
+		#region Progress Reporting
+
+		private readonly IProgress<FolderViewModel> _progressFolder;
+
+		private readonly IProgress<ScriptViewModel> _progressScript;
+
+		private void ProgressFolder(FolderViewModel model)
+		{
+			ExecutedScripts.Add(model);
+		}
+
+		private void ProgressScript(ScriptViewModel model)
+		{
+			var folderViewModel = model.Parent;
+			folderViewModel.Scripts.Add(model);
+		}
 
 		#endregion
 
@@ -270,13 +292,13 @@ namespace SqlServerRunnerNet.ViewModel
 
 					var executedFolderViewModel = new FolderViewModel {Path = path};
 
-					_parent.Dispatcher.Invoke(() => ExecutedScripts.Add(executedFolderViewModel));
+					_progressFolder.Report(executedFolderViewModel);
 					
 					foreach (var fileInfo in sqlFiles)
 					{
 						var scriptPath = fileInfo.FullName;
 
-						var executedScriptModel = new ScriptViewModel {Path = scriptPath};
+						var executedScriptModel = new ScriptViewModel {Parent = executedFolderViewModel, Path = scriptPath};
 
 						string errorMessage;
 
@@ -285,7 +307,7 @@ namespace SqlServerRunnerNet.ViewModel
 							executedScriptModel.ErrorMessage = errorMessage;
 						}
 
-						_parent.Dispatcher.Invoke(() => executedFolderViewModel.Scripts.Add(executedScriptModel));
+						_progressScript.Report(executedScriptModel);
 					}
 				}
 			});

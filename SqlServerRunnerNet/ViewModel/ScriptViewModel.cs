@@ -28,5 +28,7 @@ namespace SqlServerRunnerNet.ViewModel
 				OnPropertyChanged("HasError");
 			}
 		}
+
+		public FolderViewModel Parent { get; set; }
 	}
 }
