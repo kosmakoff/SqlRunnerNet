@@ -8,7 +8,7 @@
 	xmlns:converters="clr-namespace:SqlServerRunnerNet.Infrastructure.Converters"
 	mc:Ignorable="d" x:Class="SqlServerRunnerNet.MainWindow"
 	Title="SQL Runner .NET" Height="480" Width="640" Icon="run.ico"
-	Loaded="Window_OnLoaded" Closing="Window_Closing" SnapsToDevicePixels="True"
+	Loaded="Window_OnLoaded" Closing="Window_Closing" UseLayoutRounding="True"
 	d:DataContext="{d:DesignInstance viewModel:SqlServerRunnerViewModel}">
 	<Window.Resources>
 		<ResourceDictionary>
@@ -150,7 +150,7 @@
 								<StackPanel Orientation="Horizontal">
 									<Grid Margin="5,0,2,0">
 										<Image Source="/SqlServerRunnerNet;component/Images/folder-closed.png" x:Name="nodeImg" />
-										<Image Source="/SqlServerRunnerNet;component/Images/error-overlay.png" Stretch="None" HorizontalAlignment="Left" VerticalAlignment="Bottom" x:Name="imgError" Visibility="Hidden" />
+										<Image Source="/SqlServerRunnerNet;component/Images/error-overlay.png" HorizontalAlignment="Left" VerticalAlignment="Bottom" x:Name="imgError" Visibility="Hidden" />
 									</Grid>
 									<TextBlock Text="{Binding DisplayName}" />
 								</StackPanel>
@@ -167,7 +167,7 @@
 								<StackPanel Orientation="Horizontal">
 									<Grid Margin="5,0,2,0">
 										<Image Source="/SqlServerRunnerNet;component/Images/script.png" />
-										<Image Source="/SqlServerRunnerNet;component/Images/error-overlay.png" Stretch="None" HorizontalAlignment="Left" VerticalAlignment="Bottom" x:Name="imgError" Visibility="Hidden" />
+										<Image Source="/SqlServerRunnerNet;component/Images/error-overlay.png" HorizontalAlignment="Left" VerticalAlignment="Bottom" x:Name="imgError" Visibility="Hidden" />
 									</Grid>
 									<TextBlock Text="{Binding DisplayName}" />
 								</StackPanel>
