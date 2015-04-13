@@ -29,9 +29,6 @@
 		</Grid.RowDefinitions>
 		<Menu Grid.Row="0">
 			<MenuItem Header="File">
-				<MenuItem Header="New" />
-				<MenuItem Header="Save" />
-				<Separator />
 				<MenuItem Command="commands:ApplicationCommands.ExitCommand" />
 			</MenuItem>
 		</Menu>
